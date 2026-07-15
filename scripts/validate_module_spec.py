@@ -18,6 +18,7 @@ ALLOWED_OPERATION_MODES = {"create_new", "enhance_existing", "audit_only"}
 ALLOWED_TABLE_STRATEGIES = {"create_table", "alter_existing", "reuse_existing", "no_table"}
 ALLOWED_QUERY_IMPL = {"mybatis_plus", "custom_dao", "mapper_xml"}
 ALLOWED_ACTION_ACCESS = {"authenticated", "authority", "public"}
+ALLOWED_PERMISSION_MENU_STRATEGIES = {"create_module_directory", "attach_existing_directory", "no_menu"}
 PLACEHOLDER_RE = re.compile(r"(__FILL__|unresolved|\$\{[^}]+\}|\bXX\b)", re.IGNORECASE)
 
 
@@ -95,6 +96,7 @@ def validate(path: Path, gate: str) -> Report:
         "roles",
         "persistence",
         "template_capability_switches",
+        "permission_menu",
         "queries",
         "business_actions",
         "requirement_traceability",
@@ -159,6 +161,131 @@ def validate(path: Path, gate: str) -> Report:
         )
     else:
         report.add("pass", "CAPABILITY_SWITCHES_RESOLVED", "模板能力开关已全部决定")
+
+    permission_sql_enabled = isinstance(switches, dict) and switches.get("permission_sql") is True
+    permission_menu = get(data, "permission_menu", {})
+    menu_errors: list[str] = []
+    menu_strategy = permission_menu.get("strategy") if isinstance(permission_menu, dict) else None
+    if not isinstance(permission_menu, dict):
+        menu_errors.append("permission_menu")
+    elif menu_strategy not in ALLOWED_PERMISSION_MENU_STRATEGIES:
+        menu_errors.append("strategy")
+    elif permission_sql_enabled:
+        if permission_menu.get("enabled") is not True:
+            menu_errors.append("enabled")
+        if menu_strategy == "no_menu":
+            menu_errors.append("strategy:no_menu")
+        if permission_menu.get("match_type") != 2:
+            menu_errors.append("match_type")
+        if permission_menu.get("idempotent_by_permission_code") is not True:
+            menu_errors.append("idempotent_by_permission_code")
+        if permission_menu.get("fixed_parent_id_allowed") is not False:
+            menu_errors.append("fixed_parent_id_allowed")
+
+        page = permission_menu.get("page", {})
+        if not isinstance(page, dict):
+            menu_errors.append("page")
+            page = {}
+        for key in ("name", "permission_code", "router_path", "parent_permission_code", "parent_router"):
+            if unresolved(page.get(key)):
+                menu_errors.append(f"page.{key}")
+        if page.get("permission_type") != 1:
+            menu_errors.append("page.permission_type")
+
+        expected_parent_code = ""
+        expected_parent_router = ""
+        if menu_strategy == "create_module_directory":
+            directory = permission_menu.get("directory", {})
+            if not isinstance(directory, dict):
+                menu_errors.append("directory")
+                directory = {}
+            for key in ("name", "permission_code", "router_path"):
+                if unresolved(directory.get(key)):
+                    menu_errors.append(f"directory.{key}")
+            if directory.get("permission_type") != 0:
+                menu_errors.append("directory.permission_type")
+            if directory.get("parent_id") is not None or directory.get("parent_router") is not None:
+                menu_errors.append("directory.parent_must_be_null")
+            expected_parent_code = str(directory.get("permission_code") or "")
+            expected_parent_router = str(directory.get("router_path") or "")
+        elif menu_strategy == "attach_existing_directory":
+            existing_parent = permission_menu.get("existing_parent", {})
+            if not isinstance(existing_parent, dict) or unresolved(existing_parent.get("permission_code")):
+                menu_errors.append("existing_parent.permission_code")
+            elif existing_parent.get("required") is not True:
+                menu_errors.append("existing_parent.required")
+            else:
+                expected_parent_code = str(existing_parent.get("permission_code") or "")
+            expected_parent_router = str(page.get("parent_router") or "")
+
+        if expected_parent_code and page.get("parent_permission_code") != expected_parent_code:
+            menu_errors.append("page.parent_permission_code")
+        if expected_parent_router and page.get("parent_router") != expected_parent_router:
+            menu_errors.append("page.parent_router")
+
+        buttons = permission_menu.get("buttons", [])
+        if not isinstance(buttons, list):
+            menu_errors.append("buttons")
+            buttons = []
+        button_actions: set[str] = set()
+        button_codes: set[str] = set()
+        page_code = str(page.get("permission_code") or "")
+        page_router = str(page.get("router_path") or "")
+        for index, button in enumerate(buttons):
+            if not isinstance(button, dict):
+                menu_errors.append(f"buttons[{index}]")
+                continue
+            for key in ("action", "name", "permission_code", "parent_permission_code", "parent_router"):
+                if unresolved(button.get(key)):
+                    menu_errors.append(f"buttons[{index}].{key}")
+            if button.get("permission_type") != 2:
+                menu_errors.append(f"buttons[{index}].permission_type")
+            if page_code and button.get("parent_permission_code") != page_code:
+                menu_errors.append(f"buttons[{index}].parent_permission_code")
+            if page_router and button.get("parent_router") != page_router:
+                menu_errors.append(f"buttons[{index}].parent_router")
+            action = str(button.get("action") or "")
+            code = str(button.get("permission_code") or "")
+            if action in button_actions:
+                menu_errors.append(f"buttons[{index}].duplicate_action")
+            if code in button_codes:
+                menu_errors.append(f"buttons[{index}].duplicate_permission_code")
+            button_actions.add(action)
+            button_codes.add(code)
+
+        expected_template_buttons = {
+            action
+            for action in ("create", "edit", "remove", "excel_export", "excel_import")
+            if isinstance(switches, dict) and switches.get(action) is True
+        }
+        action_aliases = {"excel_export": "export", "excel_import": "import"}
+        expected_template_buttons = {action_aliases.get(action, action) for action in expected_template_buttons}
+        missing_actions = sorted(expected_template_buttons - button_actions)
+        if missing_actions:
+            menu_errors.append("buttons.missing:" + ",".join(missing_actions))
+        protected_action_codes = {
+            str(action.get("authority"))
+            for action in get(data, "business_actions", [])
+            if isinstance(action, dict) and action.get("access") == "authority" and action.get("authority")
+        }
+        missing_protected_codes = sorted(protected_action_codes - button_codes)
+        if missing_protected_codes:
+            menu_errors.append("buttons.missing_authority:" + ",".join(missing_protected_codes))
+    else:
+        if isinstance(permission_menu, dict) and (
+            permission_menu.get("enabled") is not False or menu_strategy != "no_menu"
+        ):
+            menu_errors.append("permission_sql_disabled_requires_no_menu")
+
+    if menu_errors:
+        report.add(
+            "blocker" if gate == "generation" else "warning",
+            "PERMISSION_MENU_INCOMPLETE",
+            "权限菜单必须明确目录、页面、按钮父子关系，并禁止固定父菜单回退",
+            "、".join(sorted(set(menu_errors))),
+        )
+    else:
+        report.add("pass", "PERMISSION_MENU_COMPLETE", "权限菜单策略与三级父子关系完整", str(menu_strategy))
 
     roles = get(data, "roles", [])
     valid_roles = [role for role in roles if isinstance(role, dict) and role.get("role_name") and role.get("operations")]

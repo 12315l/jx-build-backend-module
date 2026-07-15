@@ -45,6 +45,17 @@ template_capability_switches:
   excel_export: false
   permission_sql: true
 
+permission_menu:
+  enabled: true
+  strategy: "create_module_directory"
+  match_type: 2
+  directory: {name: "课程报名管理", permission_code: "manage:dir:courseEnrollmentTrial", permission_type: 0, router_path: "/main/modules/courseEnrollmentTrial/pages", parent_id: null, parent_router: null}
+  existing_parent: {permission_code: "", required: false}
+  page: {name: "课程报名管理", permission_code: "manage:page:courseEnrollmentTrial:base", permission_type: 1, router_path: "/main/modules/courseEnrollmentTrial/pages/base", parent_permission_code: "manage:dir:courseEnrollmentTrial", parent_router: "/main/modules/courseEnrollmentTrial/pages"}
+  buttons: []
+  idempotent_by_permission_code: true
+  fixed_parent_id_allowed: false
+
 queries:
   - {query_id: "QUERY-001", name: "后台课程报名分页", endpoint: "/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}
   - {query_id: "QUERY-002", name: "本人报名分页", endpoint: "/my/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}

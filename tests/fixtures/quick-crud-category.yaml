@@ -43,6 +43,20 @@ template_capability_switches:
   excel_export: false
   permission_sql: true
 
+permission_menu:
+  enabled: true
+  strategy: "create_module_directory"
+  match_type: 2
+  directory: {name: "资产分类管理", permission_code: "manage:dir:assetCategoryTrial", permission_type: 0, router_path: "/main/modules/assetCategoryTrial/pages", parent_id: null, parent_router: null}
+  existing_parent: {permission_code: "", required: false}
+  page: {name: "资产分类管理", permission_code: "manage:page:assetCategoryTrial:base", permission_type: 1, router_path: "/main/modules/assetCategoryTrial/pages/base", parent_permission_code: "manage:dir:assetCategoryTrial", parent_router: "/main/modules/assetCategoryTrial/pages"}
+  buttons:
+    - {action: "create", name: "新增资产分类", permission_code: "manage:btn:assetCategoryTrial:create", permission_type: 2, parent_permission_code: "manage:page:assetCategoryTrial:base", parent_router: "/main/modules/assetCategoryTrial/pages/base"}
+    - {action: "edit", name: "修改资产分类", permission_code: "manage:btn:assetCategoryTrial:edit", permission_type: 2, parent_permission_code: "manage:page:assetCategoryTrial:base", parent_router: "/main/modules/assetCategoryTrial/pages/base"}
+    - {action: "remove", name: "删除资产分类", permission_code: "manage:btn:assetCategoryTrial:remove", permission_type: 2, parent_permission_code: "manage:page:assetCategoryTrial:base", parent_router: "/main/modules/assetCategoryTrial/pages/base"}
+  idempotent_by_permission_code: true
+  fixed_parent_id_allowed: false
+
 queries:
   - {query_id: "QUERY-001", name: "资产分类分页", endpoint: "/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}
 

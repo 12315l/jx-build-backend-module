@@ -165,6 +165,14 @@ Set every template switch explicitly:
 
 Disabled capabilities must be removed consistently from backend code, annotations, permission SQL, and frontend calls.
 
+When `permission_sql` is enabled, complete `permission_menu` before generation:
+
+- Select `create_module_directory` for an independent admin module. Define a top-level directory, a business page beneath it, and the retained action buttons beneath the page.
+- Select `attach_existing_directory` only when the product requirement explicitly places the page in an existing module directory; record that parent's unique permission code.
+- Keep visible menu names separate from unique permission codes. A directory and child page may share a visible name.
+- Require repeatable inserts keyed by permission code and forbid fixed parent IDs or fallback menus.
+- Keep page and button permission codes aligned with roles, Controller authorities, frontend tokens, and traceability.
+
 ## 8. Business actions and states
 
 For each dedicated action, define:
@@ -275,6 +283,7 @@ The specification is `ready` only when all applicable checks pass:
 - Target/current coverage is recorded for each requirement.
 - Fields and table strategy are complete.
 - Roles, permissions, and server-side data scopes are defined.
+- Permission-menu strategy, directory/page/button parent chain, and repeatability rules are complete when permission SQL is enabled.
 - Queries and template switches are explicit.
 - Existing or planned frontend request, response, pagination, lookup, and permission contracts are explicit when in scope.
 - Dedicated actions, states, and terminal outcomes are complete.

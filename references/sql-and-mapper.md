@@ -138,10 +138,31 @@ Use SQL types and defaults that match the Entity and Service creation behavior. 
 
 Generate permission/menu SQL only for retained Controller capabilities.
 
+For a new independent admin module, generate this hierarchy:
+
+```text
+module directory (permission type 0, parent NULL)
+└── business page (permission type 1, parent = directory)
+    └── retained action buttons (permission type 2, parent = page)
+```
+
+Use the same visible name for directory and page when that matches the product menu, but always use different permission codes. Use `manage:dir:<module-key>`, `manage:page:<module-key>:base`, and `manage:btn:<module-key>:<action>`.
+
+Make the script repeatable:
+
+1. Insert the directory only when its permission code does not exist.
+2. Select the directory ID by its permission code after insertion or reuse.
+3. Insert the page only when its permission code does not exist, using the resolved directory ID and directory route.
+4. Select the page ID by its permission code after insertion or reuse.
+5. Insert each retained button only when its permission code does not exist, using the resolved page ID and page route.
+
+Use permission codes as stable identity. Do not search by `permission_name`, do not hardcode a parent ID, do not use `IFNULL` to redirect a missing parent, and do not rely only on `LAST_INSERT_ID()` because a repeated run may reuse an existing record. If the specification deliberately attaches a page to an existing directory, resolve the declared parent permission code and fail clearly when it is absent.
+
 For every protected endpoint, verify:
 
 - Permission authority string matches `@PreAuthorize` exactly.
 - Page permission exists before child button permissions reference it.
+- Directory permission exists before the child page references it when the module owns its directory.
 - Button label describes the actual action.
 - Menu/module key matches the frontend registration convention.
 - Disabled KeyModule actions have no remaining permission insert.
@@ -183,4 +204,3 @@ Do not claim a query is optimized until its actual execution plan or representat
 - No disabled KeyModule permission or SQL fragment remains.
 - SQL generation, execution, and verification are reported as separate states.
 - No placeholder module, table, method, field, or permission name remains.
-

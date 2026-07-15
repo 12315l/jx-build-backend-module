@@ -123,6 +123,43 @@ template_capability_switches:
   excel_export: false
   permission_sql: true
 
+# 后台权限菜单采用“模块目录 → 业务页面 → 操作按钮”三级结构。
+# 独立模块默认使用 create_module_directory；只有需求明确归入既有目录时才使用 attach_existing_directory。
+permission_menu:
+  enabled: true
+  strategy: "create_module_directory" # create_module_directory | attach_existing_directory | no_menu
+  match_type: 2
+  directory:
+    name: ""
+    permission_code: "manage:dir:${camel_name}"
+    permission_type: 0
+    router_path: "/main/modules/${camel_name}/pages"
+    parent_id: null
+    parent_router: null
+    icon: ""
+    order_by: 0
+  existing_parent:
+    permission_code: ""
+    required: false
+  page:
+    name: ""
+    permission_code: "manage:page:${camel_name}:base"
+    permission_type: 1
+    router_path: "/main/modules/${camel_name}/pages/base"
+    parent_permission_code: "manage:dir:${camel_name}"
+    parent_router: "/main/modules/${camel_name}/pages"
+    icon: ""
+    order_by: 0
+  buttons:
+    - action: "create"
+      name: ""
+      permission_code: "manage:btn:${camel_name}:create"
+      permission_type: 2
+      parent_permission_code: "manage:page:${camel_name}:base"
+      parent_router: "/main/modules/${camel_name}/pages/base"
+  idempotent_by_permission_code: true
+  fixed_parent_id_allowed: false
+
 queries:
   - query_id: "QUERY-001"
     name: "后台分页查询"

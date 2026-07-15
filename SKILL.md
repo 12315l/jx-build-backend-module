@@ -82,9 +82,10 @@ Perform these steps:
 4. Set the canonical package to `system.store.functionModule.<PascalName>Module` unless the user explicitly approves a project-level exception.
 5. Select one generation profile: `quick_crud`, `standard_relation`, `business_workflow`, or `statistics_query`.
 6. Define fields, queries, permissions, data scopes, actions, state transitions, transactions, and invariants.
-7. Decide every KeyModule capability switch explicitly.
-8. Map every requirement and flow step to its intended Controller, Service, DAO, Entity, SQL, DTO, VO, or Mapper XML destination.
-9. Record unresolved questions instead of guessing.
+7. Decide every KeyModule capability switch explicitly and complete `permission_menu` when permission SQL is enabled.
+8. For an independent admin module, default to a top-level module directory, a same-name business page beneath it, and retained action buttons beneath the page.
+9. Map every requirement and flow step to its intended Controller, Service, DAO, Entity, SQL, DTO, VO, or Mapper XML destination.
+10. Record unresolved questions instead of guessing.
 
 ## Enforce specification gates
 
@@ -167,6 +168,13 @@ Treat KeyModule as a scaffold, not as confirmed business scope.
 - Default public details, public page, recovery, batch status, batch sort, Excel import, and Excel export to disabled unless requirements enable them.
 - Keep create, edit, remove, and permission SQL only when the module's profile and requirements need them.
 - Remove disabled capabilities consistently from Controller, Service, Entity annotations, permission SQL, and frontend calls.
+- Treat the KeyModule parent-menu lookup and fixed `系统管理(12)` fallback as a legacy scaffold assumption, never as completed module SQL.
+- When permission SQL is enabled for an independent admin module, generate `模块目录 → 业务页面 → 操作按钮`. The directory and page may use the same visible business name, but their unique permission codes and types must differ.
+- Use `manage:dir:<module-key>` for the directory, `manage:page:<module-key>:base` for the page, and `manage:btn:<module-key>:<action>` for buttons.
+- Resolve and reuse every permission record by its unique permission code. Never locate a parent by its visible name, never use a fixed numeric parent ID, and never fall back to another unrelated menu.
+- Use `attach_existing_directory` only when the specification explicitly names an existing parent permission code. If that parent is absent, stop and report the blocker instead of silently changing the menu location.
+- Make permission SQL safe to run repeatedly with existence checks by permission code, then reselect directory and page IDs by permission code before inserting children. Do not depend only on the most recent inserted ID.
+- Start independent-module permission SQL from [assets/permission-menu-template.sql](assets/permission-menu-template.sql), replace all placeholders, and remove or add button blocks strictly from the completed module specification.
 
 ## Preserve traceability
 

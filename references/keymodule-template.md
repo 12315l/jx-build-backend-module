@@ -128,6 +128,8 @@ The SQL creates the matching base table and inserts menu/button permissions for:
 
 The SQL currently begins with a drop-if-exists statement. Treat it as new-table initialization content only. Never use drop-and-recreate to alter an existing project table, and never execute generated SQL without explicit authority.
 
+The current KeyModule permission fragment may look up “系统管理” and fall back to a fixed parent ID. This is a legacy scaffold assumption, not a valid final menu design. During trimming, replace it with the permission hierarchy declared in `permission_menu`. An independent module creates its own top-level directory, same-name business page, and retained buttons; an explicitly nested module resolves its declared existing parent by permission code and stops if that parent is missing.
+
 ## 7. Capability switch defaults
 
 Use these defaults unless the module specification overrides them:
@@ -212,6 +214,8 @@ When disabling a capability, update every affected layer.
 - Exactly the intended scaffold files exist at the planned paths.
 - No Python file exists in the business module output.
 - No unresolved `Key`, `key`, `XX`, or module-name placeholder remains.
+- No lookup by visible parent name, fixed numeric parent ID, or fallback to “系统管理” remains in permission SQL.
+- Independent admin modules contain a directory, page, and retained buttons linked by permission code.
 - Disabled capability endpoints and permissions are absent.
 - Retained capability methods, fields, annotations, SQL permissions, and frontend calls are aligned.
 - Commented example fields were either intentionally implemented or removed from generated code.

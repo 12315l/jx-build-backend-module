@@ -47,6 +47,19 @@ template_capability_switches:
   excel_export: false
   permission_sql: true
 
+permission_menu:
+  enabled: true
+  strategy: "create_module_directory"
+  match_type: 2
+  directory: {name: "报修工单管理", permission_code: "manage:dir:repairWorkOrderTrial", permission_type: 0, router_path: "/main/modules/repairWorkOrderTrial/pages", parent_id: null, parent_router: null}
+  existing_parent: {permission_code: "", required: false}
+  page: {name: "报修工单管理", permission_code: "manage:page:repairWorkOrderTrial:base", permission_type: 1, router_path: "/main/modules/repairWorkOrderTrial/pages/base", parent_permission_code: "manage:dir:repairWorkOrderTrial", parent_router: "/main/modules/repairWorkOrderTrial/pages"}
+  buttons:
+    - {action: "accept", name: "受理工单", permission_code: "manage:btn:repairWorkOrderTrial:accept", permission_type: 2, parent_permission_code: "manage:page:repairWorkOrderTrial:base", parent_router: "/main/modules/repairWorkOrderTrial/pages/base"}
+    - {action: "complete", name: "完成工单", permission_code: "manage:btn:repairWorkOrderTrial:complete", permission_type: 2, parent_permission_code: "manage:page:repairWorkOrderTrial:base", parent_router: "/main/modules/repairWorkOrderTrial/pages/base"}
+  idempotent_by_permission_code: true
+  fixed_parent_id_allowed: false
+
 queries:
   - {query_id: "QUERY-001", name: "后台工单分页", endpoint: "/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}
   - {query_id: "QUERY-002", name: "本人工单分页", endpoint: "/my/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}

@@ -126,6 +126,34 @@ def plan(project_root: Path, spec_file: Path, override_name: str | None) -> Repo
     if permission_sql is True and module_exists and "a_permission_table" not in sql_text:
         report.add("warning", "PERMISSION_SQL_ENABLED_BUT_MISSING", "权限 SQL 已启用，但模块脚本未发现权限写入")
 
+    permission_menu = get(data, "permission_menu", {})
+    permission_menu_strategy = permission_menu.get("strategy") if isinstance(permission_menu, dict) else None
+    if permission_sql is True and module_exists:
+        legacy_parent_fallback = (
+            "permission_name` = '系统管理'" in sql_text
+            or "permission_name = '系统管理'" in sql_text
+            or "IFNULL(@parent_id" in sql_text
+        )
+        if legacy_parent_fallback:
+            report.add(
+                "warning",
+                "LEGACY_FIXED_PARENT_MENU",
+                "KeyModule 的系统管理固定父菜单回退仍然存在，裁剪时必须替换为规格中的目录—页面—按钮结构",
+            )
+        if permission_menu_strategy == "create_module_directory" and "manage:dir:" not in sql_text:
+            report.add(
+                "warning",
+                "MODULE_DIRECTORY_PERMISSION_MISSING",
+                "规格要求模块自建父级目录，但当前 SQL 尚未注册目录权限",
+            )
+        if isinstance(permission_menu, dict) and permission_menu.get("idempotent_by_permission_code") is True:
+            if "WHERE NOT EXISTS" not in sql_text.upper():
+                report.add(
+                    "warning",
+                    "PERMISSION_SQL_REPEAT_GUARD_MISSING",
+                    "权限 SQL 尚未按权限标识增加重复执行保护",
+                )
+
     report.add("unverified", "BUSINESS_ENHANCEMENT_REQUIRED", "裁剪计划只处理 KeyModule 通用能力，业务字段、DTO/VO、专用动作、事务和复杂查询仍须按规格实现")
     report.data = {
         "module": pascal,
@@ -133,6 +161,8 @@ def plan(project_root: Path, spec_file: Path, override_name: str | None) -> Repo
         "module_exists": module_exists,
         "capability_actions": actions,
         "permission_sql_enabled": permission_sql,
+        "permission_menu_strategy": permission_menu_strategy,
+        "permission_menu": permission_menu,
         "business_actions": get(data, "business_actions", []),
         "generated_files": get(data, "generated_files", {}),
         "writes_performed": False,
@@ -147,4 +177,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

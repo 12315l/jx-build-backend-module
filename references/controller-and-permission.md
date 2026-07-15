@@ -118,6 +118,7 @@ Never accept these values from the client when the server can determine them:
 Use the current naming convention unless the inspected project defines a different confirmed convention:
 
 ```text
+manage:dir:<module-key>
 manage:page:<module-key>:base
 manage:btn:<module-key>:create
 manage:btn:<module-key>:edit
@@ -125,6 +126,16 @@ manage:btn:<module-key>:remove
 manage:btn:<module-key>:export
 manage:btn:<module-key>:import
 ```
+
+For a new independent admin module, register permissions as a three-level tree:
+
+1. A top-level module directory with permission type `0`, route `/main/modules/<module-key>/pages`, and no parent.
+2. A business page with permission type `1`, route `/main/modules/<module-key>/pages/base`, and the directory as its parent.
+3. Retained action buttons with permission type `2` and the business page as their parent.
+
+The directory and page may deliberately share the same visible name, such as both being “训练场地管理”. Their identity comes from `manage:dir:trainingVenue` and `manage:page:trainingVenue:base`, not from the visible name.
+
+Use `create_module_directory` by default for an independent module. Use `attach_existing_directory` only when the module specification explicitly provides the existing parent permission code. Resolve parents by permission code, never by visible name or a fixed numeric ID. If an explicitly required existing parent is missing, block generation or execution; do not fall back to “系统管理” or another menu.
 
 For workflow actions, create a specific button authority whose final segment describes the action. Reuse an existing authority only when it represents the same business power. Do not protect issue, return, settlement, approval, or completion with a generic edit authority merely to avoid adding permission data.
 

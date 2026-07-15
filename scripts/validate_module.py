@@ -86,13 +86,20 @@ def sql_columns(sql_text: str) -> dict[str, str]:
 
 
 def registered_authorities(sql_text: str) -> set[str]:
-    authorities = set(re.findall(r"manage:(?:page|btn):[a-zA-Z0-9_]+:[a-zA-Z0-9_]+", sql_text))
+    authorities = set(
+        re.findall(
+            r"manage:dir:[a-zA-Z0-9_]+|manage:(?:page|btn):[a-zA-Z0-9_]+:[a-zA-Z0-9_]+",
+            sql_text,
+        )
+    )
     raw_match = re.search(r"SET\s+@raw_key\s*=\s*'([^']+)'", sql_text, re.IGNORECASE)
     if not raw_match:
         return authorities
     raw_key = raw_match.group(1)
     parts = raw_key.split("_")
     key = raw_key if len(parts) == 1 else parts[0] + parts[-1][:1].upper() + parts[-1][1:]
+    if "manage:dir:" in sql_text:
+        authorities.add(f"manage:dir:{key}")
     if "manage:page:" in sql_text and "':base'" in sql_text:
         authorities.add(f"manage:page:{key}:base")
     for suffix in re.findall(r"manage:btn:.*?':([a-zA-Z0-9_]+)'", sql_text, re.IGNORECASE | re.DOTALL):
@@ -205,6 +212,16 @@ def validate(project_root: Path, module_name: str, spec_file: Path | None) -> Re
 
     authorities = set(AUTHORITY_RE.findall(controller_text))
     sql_authorities = registered_authorities(sql_text)
+    legacy_parent_fallback = bool(
+        re.search(r"`?permission_name`?\s*=\s*'系统管理'", sql_text, re.IGNORECASE)
+        or re.search(r"IFNULL\s*\(\s*@(?:parent|directory)[a-zA-Z0-9_]*\s*,\s*\d+\s*\)", sql_text, re.IGNORECASE)
+    )
+    if legacy_parent_fallback:
+        report.add(
+            "blocker",
+            "FIXED_PARENT_MENU_FALLBACK",
+            "权限 SQL 仍按显示名称查找父菜单或回退到固定编号，必须改为按权限标识创建或解析父目录",
+        )
     missing_permission_sql = sorted(authorities - sql_authorities)
     if missing_permission_sql and sql_text:
         report.add("unverified", "PERMISSION_SQL_NOT_LOCAL", "Controller 权限未在模块 SQL 中找到对应注册，需继续核对全局初始化脚本或实际数据库", "、".join(missing_permission_sql))
@@ -247,6 +264,68 @@ def validate(project_root: Path, module_name: str, spec_file: Path | None) -> Re
                         report.add("blocker", "ENABLED_ENDPOINT_MISSING", f"规格启用的模板接口不存在：{key}", endpoint)
                 if switches.get("permission_sql") is True and missing_permission_sql:
                     report.add("blocker", "SPEC_PERMISSION_SQL_MISSING", "规格要求权限 SQL，但接口权限未在模块 SQL 中完整注册", "、".join(missing_permission_sql))
+                if switches.get("permission_sql") is True:
+                    permission_menu = get(spec_data, "permission_menu", {})
+                    expected_menu_codes: set[str] = set()
+                    if isinstance(permission_menu, dict):
+                        strategy = permission_menu.get("strategy")
+                        if strategy == "create_module_directory":
+                            directory = permission_menu.get("directory", {})
+                            if isinstance(directory, dict) and directory.get("permission_code"):
+                                expected_menu_codes.add(str(directory["permission_code"]))
+                        page = permission_menu.get("page", {})
+                        if isinstance(page, dict) and page.get("permission_code"):
+                            expected_menu_codes.add(str(page["permission_code"]))
+                        buttons = permission_menu.get("buttons", [])
+                        for button in buttons if isinstance(buttons, list) else []:
+                            if isinstance(button, dict) and button.get("permission_code"):
+                                expected_menu_codes.add(str(button["permission_code"]))
+                    missing_menu_codes = sorted(expected_menu_codes - sql_authorities)
+                    if missing_menu_codes:
+                        report.add(
+                            "blocker",
+                            "PERMISSION_MENU_RECORD_MISSING",
+                            "规格中的目录、页面或按钮权限未在模块 SQL 中完整注册",
+                            "、".join(missing_menu_codes),
+                        )
+                    elif expected_menu_codes:
+                        report.add(
+                            "pass",
+                            "PERMISSION_MENU_RECORDS_PRESENT",
+                            "规格中的目录、页面和按钮权限均已注册",
+                            str(len(expected_menu_codes)),
+                        )
+
+                    if isinstance(permission_menu, dict) and permission_menu.get("idempotent_by_permission_code") is True:
+                        permission_insert_count = len(
+                            re.findall(r"INSERT\s+INTO\s+`?a_permission_table`?", sql_text, re.IGNORECASE)
+                        )
+                        guarded_insert_count = len(re.findall(r"\bNOT\s+EXISTS\s*\(", sql_text, re.IGNORECASE))
+                        if permission_insert_count and guarded_insert_count < permission_insert_count:
+                            report.add(
+                                "blocker",
+                                "PERMISSION_SQL_NOT_IDEMPOTENT",
+                                "权限写入未全部按权限标识进行重复执行保护",
+                                f"权限写入 {permission_insert_count} 条，存在性保护 {guarded_insert_count} 条",
+                            )
+                        elif permission_insert_count:
+                            report.add("pass", "PERMISSION_SQL_IDEMPOTENT", "权限写入具备按权限标识重复执行保护")
+
+                    if isinstance(permission_menu, dict) and permission_menu.get("strategy") == "create_module_directory":
+                        id_lookups = len(
+                            re.findall(
+                                r"SELECT\s+`?id`?\s+FROM\s+`?a_permission_table`?.*?`?permission_code`?\s*=",
+                                sql_text,
+                                re.IGNORECASE | re.DOTALL,
+                            )
+                        )
+                        if id_lookups < 2:
+                            report.add(
+                                "blocker",
+                                "PERMISSION_PARENT_CHAIN_UNVERIFIED",
+                                "独立模块必须在插入或复用后分别按权限标识重新取得目录和页面编号",
+                                str(id_lookups),
+                            )
 
             spec_fields = get(spec_data, "persistence.fields", [])
             missing_spec_properties = []

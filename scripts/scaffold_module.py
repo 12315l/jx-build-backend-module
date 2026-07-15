@@ -15,6 +15,10 @@ from validate_module_spec import get, load_document, validate as validate_spec
 
 
 NAME_RE = re.compile(r"[A-Z][A-Za-z0-9]*")
+PERMISSION_COLUMNS = (
+    "(`permission_name`, `permission_code`, `permission_match_type`, `permission_type`, `router_path`, "
+    "`api_path`, `is_allowed`, `parent_id`, `parent_router`, `icon`, `remark`, `status`, `order_by`)"
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -31,11 +35,138 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def replacement_content(source: Path, text: str, pascal: str, camel: str, snake: str, chinese: str) -> str:
+def sql_string(value: Any) -> str:
+    if value is None or value == "":
+        return "NULL"
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def render_permission_sql(data: dict[str, Any]) -> str:
+    menu = get(data, "permission_menu", {})
+    if not isinstance(menu, dict) or menu.get("enabled") is not True:
+        return ""
+    strategy = str(menu.get("strategy") or "")
+    page = menu.get("page", {}) if isinstance(menu.get("page"), dict) else {}
+    match_type = int(menu.get("match_type", 2))
+    lines = ["-- 按模块规格注册目录、页面与按钮；以权限标识保证重复执行安全"]
+
+    if strategy == "create_module_directory":
+        directory = menu.get("directory", {}) if isinstance(menu.get("directory"), dict) else {}
+        lines.extend(
+            [
+                f"SET @directory_code = {sql_string(directory.get('permission_code'))};",
+                f"SET @directory_route = {sql_string(directory.get('router_path'))};",
+                f"INSERT INTO `a_permission_table` {PERMISSION_COLUMNS}",
+                "SELECT "
+                + ", ".join(
+                    [
+                        sql_string(directory.get("name")),
+                        "@directory_code",
+                        str(match_type),
+                        "0",
+                        "@directory_route",
+                        "NULL",
+                        "0",
+                        "NULL",
+                        "NULL",
+                        sql_string(directory.get("icon")),
+                        sql_string(f"{directory.get('name', '')}目录"),
+                        "1",
+                        str(directory.get("order_by", 0)),
+                    ]
+                ),
+                "WHERE NOT EXISTS (SELECT 1 FROM `a_permission_table` WHERE `permission_code` = @directory_code);",
+            ]
+        )
+    else:
+        existing_parent = menu.get("existing_parent", {}) if isinstance(menu.get("existing_parent"), dict) else {}
+        lines.extend(
+            [
+                "-- 规格要求挂到既有目录；目录缺失时后续页面和按钮均不会写入，不允许回退到其他菜单。",
+                f"SET @directory_code = {sql_string(existing_parent.get('permission_code'))};",
+                f"SET @directory_route = {sql_string(page.get('parent_router'))};",
+            ]
+        )
+
+    lines.extend(
+        [
+            "SET @directory_id = (SELECT `id` FROM `a_permission_table` WHERE `permission_code` = @directory_code ORDER BY `id` LIMIT 1);",
+            f"SET @page_code = {sql_string(page.get('permission_code'))};",
+            f"SET @page_route = {sql_string(page.get('router_path'))};",
+            f"INSERT INTO `a_permission_table` {PERMISSION_COLUMNS}",
+            "SELECT "
+            + ", ".join(
+                [
+                    sql_string(page.get("name")),
+                    "@page_code",
+                    str(match_type),
+                    "1",
+                    "@page_route",
+                    "NULL",
+                    "0",
+                    "@directory_id",
+                    "@directory_route",
+                    sql_string(page.get("icon")),
+                    sql_string(f"{page.get('name', '')}页面"),
+                    "1",
+                    str(page.get("order_by", 0)),
+                ]
+            ),
+            "WHERE @directory_id IS NOT NULL",
+            "  AND NOT EXISTS (SELECT 1 FROM `a_permission_table` WHERE `permission_code` = @page_code);",
+            "SET @page_id = (SELECT `id` FROM `a_permission_table` WHERE `permission_code` = @page_code ORDER BY `id` LIMIT 1);",
+        ]
+    )
+
+    buttons = menu.get("buttons", [])
+    for index, button in enumerate(buttons if isinstance(buttons, list) else []):
+        if not isinstance(button, dict):
+            continue
+        variable = f"@button_code_{index + 1}"
+        lines.extend(
+            [
+                f"SET {variable} = {sql_string(button.get('permission_code'))};",
+                f"INSERT INTO `a_permission_table` {PERMISSION_COLUMNS}",
+                "SELECT "
+                + ", ".join(
+                    [
+                        sql_string(button.get("name")),
+                        variable,
+                        str(match_type),
+                        "2",
+                        "NULL",
+                        "NULL",
+                        "0",
+                        "@page_id",
+                        "@page_route",
+                        "NULL",
+                        sql_string(button.get("name")),
+                        "1",
+                        "0",
+                    ]
+                ),
+                "WHERE @page_id IS NOT NULL",
+                f"  AND NOT EXISTS (SELECT 1 FROM `a_permission_table` WHERE `permission_code` = {variable});",
+            ]
+        )
+    return "\n".join(lines) + "\n"
+
+
+def replacement_content(
+    source: Path,
+    text: str,
+    pascal: str,
+    camel: str,
+    snake: str,
+    chinese: str,
+    data: dict[str, Any],
+) -> str:
     if source.suffix.lower() == ".sql":
-        result = text.replace("c_key_table", f"c_{snake}_table")
-        result = result.replace("SET @raw_key = 'key';", f"SET @raw_key = '{camel}';")
-        return result.replace("XX", chinese)
+        table_sql = text.split("-- 自动注册菜单与按钮权限 SQL", 1)[0]
+        table_sql = table_sql.replace("c_key_table", f"c_{snake}_table").replace("XX", chinese).rstrip()
+        if get(data, "template_capability_switches.permission_sql") is not True:
+            return table_sql + "\n"
+        return table_sql + "\n\n" + render_permission_sql(data)
     result = text.replace("Key", pascal).replace("key", camel).replace("XX", chinese)
     return result.replace(f"c_{camel}_table", f"c_{snake}_table")
 
@@ -162,7 +293,7 @@ def build_report(project_root: Path, spec_file: Path, execute: bool, confirm_aut
             relative_target = target.relative_to(target_root)
             staged = temp_root / relative_target
             staged.parent.mkdir(parents=True, exist_ok=True)
-            content = replacement_content(source, read_text(source), pascal, camel, snake, chinese)
+            content = replacement_content(source, read_text(source), pascal, camel, snake, chinese, data)
             staged.write_text(content, encoding="utf-8", newline="\n")
         if target_root.exists():
             raise FileExistsError(str(target_root))

@@ -1,4 +1,4 @@
 interface:
-  display_name: "低代码后端模块构建助手"
-  short_description: "依据角色功能与核心流程生成并验收低代码平台后台业务模块"
-  default_prompt: "使用 $jx-build-backend-module 读取项目需求和核心流程，形成模块规格并生成可编译的后台代码。"
+  display_name: "低代码业务模块构建助手"
+  short_description: "依据角色功能与核心流程生成并验收低代码平台前后端业务模块"
+  default_prompt: "使用 $jx-build-backend-module 读取项目需求和核心流程，形成模块规格并生成匹配平台规范的 Java 后端与 Vue 前端代码。"
