@@ -1,13 +1,13 @@
 ---
 name: jx-build-backend-module
-description: Create, enhance, and audit backend business modules for this Spring Boot and MyBatis-Plus low-code platform. Use when Codex receives role-based feature lists, core business flows, project requirements, or existing code and needs to produce module specifications or generate Controller, Service, DAO, Entity, SQL, DTO, VO, or Mapper XML under system.store.functionModule.
+description: Create, enhance, and audit full-stack business modules for this Spring Boot, MyBatis-Plus, and Vue low-code platform. Use when Codex receives role-based feature lists, core business flows, project requirements, or existing code and needs to produce module specifications; generate Controller, Service, DAO, Entity, SQL, DTO, VO, or Mapper XML under system.store.functionModule; or configure matching admin pages, user-facing pages, service calls, and theme variables in jx-template-admin or jx-template-front.
 ---
 
-# Build Low-Code Backend Modules
+# Build Low-Code Business Modules
 
 ## Core outcome
 
-Convert project requirements into a traceable module specification, then use that specification to generate and verify backend code that matches the current platform.
+Convert project requirements into a traceable module specification, then use that specification to generate and verify backend code and requirement-authorized frontend pages that match the current platform.
 
 Treat the module specification as the contract between business requirements and code. Do not begin code generation while an outcome-changing field remains unresolved.
 
@@ -117,12 +117,24 @@ Copy [assets/module-outline-template.md](assets/module-outline-template.md) to p
 
 Generate project business code only as Java, SQL, and necessary Mapper XML. Keep any future Python helper scripts inside the Skill's own `scripts` directory; never copy them into `base-framework`, `src/main/java`, or `system.store.functionModule`.
 
+## Plan Vue frontend output
+
+Read [references/frontend-page-and-theme.md](references/frontend-page-and-theme.md) completely before creating or changing admin page configuration, user-facing pages, module service calls, or theme variables.
+
+- Generate admin module pages beneath `jx-template-admin/src/views/main/modules/<camelName>` and inspect the current shared `PageSearch`, `PageContent`, `PageModal`, and `PageDetails` components before selecting configuration properties.
+- Use `search.config.ts`, `content.config.ts`, `modal.config.ts`, and `details.config.ts` only when the page actually consumes them. Do not force a custom workflow page into CRUD configuration.
+- Generate user-facing pages beneath `jx-template-front/src/views/main/modules/<camelName>` from the current page and shared-component contracts. Do not invent a `config` folder when this frontend has no such convention.
+- Keep frontend `prop`, request properties, response properties, dictionary names, routes, and permission tokens traceable to the module specification and backend contract.
+- When changing `variables.module.less`, preserve declaration order, `:export` order, `:root` order, existing variables, and unchanged lines. Replace values in place and never create duplicate variable declarations.
+- Generate frontend project files only as Vue, TypeScript, Less/CSS, and existing project-supported assets. Keep Skill infrastructure scripts out of both frontend projects.
+
 ## Generate each backend layer
 
 Read the reference for every layer that the planned change touches:
 
 - Read [references/controller-and-permission.md](references/controller-and-permission.md) completely before generating Controller endpoints, request boundaries, permission annotations, or permission SQL.
 - Read [references/frontend-contract.md](references/frontend-contract.md) completely when an admin or user-facing frontend module exists, frontend integration is in scope, or backend fields, filters, permissions, and response shapes must match current low-code page configuration.
+- Read [references/frontend-page-and-theme.md](references/frontend-page-and-theme.md) completely before writing those frontend files or changing their theme.
 - Read [references/service-and-transaction.md](references/service-and-transaction.md) completely before generating business validation, role data scope, workflow transitions, quantity changes, or transactions.
 - Read [references/entity-and-database.md](references/entity-and-database.md) completely before generating Entity, DTO, VO, table fields, constraints, indexes, or database migration plans.
 - Read [references/sql-and-mapper.md](references/sql-and-mapper.md) completely before generating DAO methods, Mapper XML, table SQL, migration SQL, or permission SQL.
