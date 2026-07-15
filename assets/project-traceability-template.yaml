@@ -1,0 +1,91 @@
+# 项目级需求到代码追踪模板
+# 本文件用于连接角色功能、核心流程、模块规格和真实代码证据。
+
+traceability:
+  version: "1.0"
+  status: "draft" # draft | mapped | implemented | verified
+  project_name: ""
+  requirement_version: ""
+  requirement_source: ""
+  inspected_project_root: ""
+  latest_correction_date: ""
+  forbidden_capabilities: []
+
+features:
+  - requirement_id: "REQ-ROLE-001"
+    role: ""
+    name: ""
+    original_requirement: ""
+    action_type: "" # view | maintain | submit | review | confirm | record | statistics | dedicated
+    data_scope: ""
+    target_module: ""
+    ownership: "business_module" # business_module | base_module | frontend_only | offline
+    coverage_status: "to_confirm" # platform_existing | partial | to_develop | to_remove | verified | to_confirm
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping:
+      controller_file: ""
+      endpoint: ""
+      service_file: ""
+      service_method: ""
+      data_files: []
+      permission: ""
+    evidence_files: []
+    acceptance_cases: []
+    disposition: ""
+
+flows:
+  - flow_id: "FLOW-001"
+    name: ""
+    source_requirement_ids: []
+    steps:
+      - flow_step_id: "FLOW-001-S01"
+        order: 1
+        actor: ""
+        operation_type: "online" # online | offline | mixed
+        original_step: ""
+        target_module: ""
+        no_new_backend_code: false
+        no_code_reason: ""
+        offline_confirmation: ""
+        mapping:
+          controller_file: ""
+          endpoint: ""
+          service_file: ""
+          service_method: ""
+          data_files: []
+        validations: []
+        data_changes: []
+        quantity_changes: []
+        state_change: ""
+        transaction_boundary: ""
+        failure_outcomes: []
+        evidence_files: []
+        acceptance_cases: []
+
+modules:
+  - module_id: "MODULE-001"
+    module_name: ""
+    ownership: "business_module"
+    package_root: "system.store.functionModule.${pascal_name}Module"
+    requirement_ids: []
+    flow_step_ids: []
+    module_spec_file: ""
+    implementation_status: "draft"
+
+decisions:
+  - decision_id: "DECISION-001"
+    description: ""
+    affected_requirement_ids: []
+    affected_flow_step_ids: []
+    disposition: ""
+    evidence: ""
+
+verification:
+  all_features_mapped: false
+  all_flow_steps_mapped: false
+  evidence_paths_checked: false
+  module_specs_created: false
+  implementation_verified: false
+  unverified_items: []
+

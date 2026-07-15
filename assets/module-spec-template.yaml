@@ -1,0 +1,336 @@
+# 低代码后台模块规格模板
+# 复制本文件后填写。空字符串、null、__FILL__ 和 unresolved 表示尚未确认。
+
+specification:
+  version: "1.0"
+  status: "draft" # draft | ready | authorized | implemented | verified
+  project_name: ""
+  module_spec_id: "MODULE-001"
+  created_from:
+    requirement_document: ""
+    source_files: []
+    latest_corrections: []
+  implementation_authorized: false
+
+module_identity:
+  chinese_name: ""
+  pascal_name: ""
+  camel_name: ""
+  snake_name: ""
+  generation_profile: "" # quick_crud | standard_relation | business_workflow | statistics_query
+  operation_mode: "" # create_new | enhance_existing | audit_only
+  backend_module_root: "base-framework"
+  java_source_root: "base-framework/src/main/java"
+  resources_root: "base-framework/src/main/resources"
+  package_root: "system.store.functionModule.${pascal_name}Module"
+  module_directory: "base-framework/src/main/java/system/store/functionModule/${pascal_name}Module"
+  controller_route_prefix: "/${camel_name}"
+  permission_key: "${camel_name}"
+  table_strategy: "" # create_table | alter_existing | reuse_existing | no_table
+  table_name: "c_${snake_name}_table"
+  business_goal: ""
+  in_scope: []
+  out_of_scope: []
+
+coverage_summary:
+  current_state: ""
+  target_state: ""
+  coverage_status: "to_develop" # platform_existing | partial | to_develop | to_remove | verified
+  inspected_evidence: []
+
+roles:
+  - role_code: ""
+    role_name: ""
+    operations: []
+    data_scope: "" # self | own_course | own_team | assigned | all | custom
+    data_scope_rule: ""
+    page_permission: ""
+    action_permissions: []
+    source_requirement_ids: []
+
+dependencies:
+  base_modules: []
+  business_modules: []
+  dictionaries: []
+  files_or_storage: []
+  external_capabilities: []
+  forbidden_new_capabilities: []
+
+persistence:
+  primary_key:
+    property: "id"
+    column: "id"
+    java_type: "Integer"
+    sql_type: "INT"
+    auto_increment: true
+  logical_delete:
+    enabled: true
+    property: "isDelete"
+    column: "is_delete"
+    active_value: 0
+    deleted_value: 1
+  common_fields:
+    creator: true
+    create_time: true
+    update_time: true
+    status: null
+    type: null
+    sort: null
+  fields:
+    - field_id: "FIELD-001"
+      business_name: ""
+      property_name: ""
+      column_name: ""
+      java_type: ""
+      sql_type: ""
+      length: null
+      precision: null
+      scale: null
+      nullable: true
+      default_value: null
+      unique: false
+      validation_rules: []
+      validation_message: ""
+      query_usage: [] # exact | fuzzy | range | sort | group
+      display: true
+      excel_import: false
+      excel_export: false
+      association:
+        enabled: false
+        target_module: ""
+        target_entity: ""
+        target_property: ""
+        deletion_effect: ""
+      source_requirement_ids: []
+      notes: ""
+  indexes: []
+  unique_constraints: []
+  destructive_statements_allowed: false
+
+template_capability_switches:
+  admin_details: true
+  admin_page: true
+  create: null
+  edit: null
+  remove: null
+  public_details: false
+  public_page: false
+  recover: false
+  batch_status: false
+  batch_sort: false
+  low_code_metadata: true
+  excel_import: false
+  excel_export: false
+  permission_sql: true
+
+queries:
+  - query_id: "QUERY-001"
+    name: "后台分页查询"
+    endpoint: "/page"
+    http_method: "GET"
+    request_type: "CommonPage" # 真实额外筛选存在时填写专用 Page 类
+    access: "protected" # public | protected
+    roles: []
+    data_scope: ""
+    filters: []
+    pagination: true
+    default_sort: ""
+    result_shape: "entity" # entity | vo | aggregate
+    result_type: ""
+    implementation: "mybatis_plus" # mybatis_plus | custom_dao | mapper_xml
+    empty_result: "empty_page"
+    source_requirement_ids: []
+
+write_operations:
+  create:
+    enabled: null
+    request_type: "entity" # entity | dto
+    validation_rules: []
+    server_owned_fields: ["creator", "createTime", "isDelete"]
+  edit:
+    enabled: null
+    request_type: "entity"
+    validation_rules: []
+    immutable_fields: ["creator", "createTime"]
+  remove:
+    enabled: null
+    logical: true
+    association_checks: []
+  recover:
+    enabled: false
+    allowed_roles: []
+
+business_actions:
+  - action_id: "ACTION-001"
+    name: ""
+    endpoint: ""
+    http_method: "POST"
+    access: "" # authenticated | authority | public
+    authority: "" # access=authority 时必填，并与权限 SQL、前端按钮一致
+    allowed_roles: []
+    data_scope: ""
+    request_type: "" # dto | entity | params
+    request_class: ""
+    source_states: []
+    target_state: ""
+    preconditions: []
+    validations: []
+    data_changes: []
+    quantity_changes: []
+    transaction_required: false
+    idempotency_rule: ""
+    operation_log: ""
+    failure_outcomes: []
+    source_requirement_ids: []
+    source_flow_step_ids: []
+
+state_machine:
+  enabled: false
+  state_property: ""
+  states:
+    - code: ""
+      business_name: ""
+      initial: false
+      terminal: false
+  transitions:
+    - transition_id: "TRANSITION-001"
+      action_id: ""
+      from_states: []
+      to_state: ""
+      actor_roles: []
+      preconditions: []
+      data_effects: []
+      failure_state: "unchanged"
+
+transactions:
+  - transaction_id: "TX-001"
+    action_id: ""
+    records_changed: []
+    must_succeed_together: []
+    rollback_conditions: []
+
+invariants:
+  - invariant_id: "INV-001"
+    description: ""
+    enforcement_layer: "service" # service | database | service_and_database
+    implementation_location: ""
+    verification_case: ""
+
+api_contract:
+  response_wrapper: "SimpleHttpResponse"
+  pagination_request: "CommonPage"
+  pagination_response: "PageList"
+  error_style: "platform_business_message"
+  identity_source: "SecurityUtil"
+  public_endpoints: []
+  protected_endpoints: []
+
+# 仅描述前端页面与后台之间的真实数据契约，不承担页面视觉设计。
+# 没有现有或计划中的前端页面时保持 in_scope: false，其余列表可为空。
+frontend_contract:
+  in_scope: false
+  source_status: "not_applicable" # existing | planned | not_applicable
+  frontend_roots: []
+  page_files: []
+  service_files: []
+  search_config_files: []
+  modal_config_files: []
+  content_config_files: []
+  details_config_files: []
+  pagination:
+    list_key: "list"
+    total_key: "total"
+    frontend_transform: ""
+  request_mappings:
+    - frontend_property: ""
+      backend_destination: "" # entity | dto | query | ignored
+      classification: "" # client_writable | server_owned | associated | display_only
+      evidence: ""
+  response_mappings:
+    - frontend_property: ""
+      backend_source: "" # entity | vo | aggregate | frontend_transform
+      evidence: ""
+  lookup_contracts:
+    - business_name: ""
+      endpoint: ""
+      value_property: ""
+      label_property: ""
+      frontend_option_mapping: "labelCode/labelValue"
+  button_permissions:
+    - action: ""
+      controller_authority: ""
+      permission_sql_code: ""
+      frontend_token: ""
+      substring_collision_checked: false
+  frontend_build_command: ""
+
+generated_files:
+  mandatory:
+    - "base-framework/src/main/java/system/store/functionModule/${pascal_name}Module/controller/${pascal_name}Controller.java"
+    - "base-framework/src/main/java/system/store/functionModule/${pascal_name}Module/service/${pascal_name}Service.java"
+    - "base-framework/src/main/java/system/store/functionModule/${pascal_name}Module/dao/${pascal_name}Dao.java"
+    - "base-framework/src/main/java/system/store/functionModule/${pascal_name}Module/model/entity/${pascal_name}.java"
+    - "base-framework/src/main/java/system/store/functionModule/${pascal_name}Module/db/c_${snake_name}_table.sql"
+  conditional:
+    dto_files: []
+    vo_files: []
+    mapper_xml: "base-framework/src/main/resources/mapper/function/${pascal_name}Mapper.xml"
+  files_to_modify: []
+  files_to_preserve: []
+  files_to_remove: []
+
+requirement_traceability:
+  features:
+    - requirement_id: "REQ-ROLE-001"
+      role: ""
+      original_feature: ""
+      business_goal: ""
+      target_module: ""
+      coverage_status: "to_develop"
+      controller_destination: ""
+      service_destination: ""
+      data_destination: ""
+      permission: ""
+      acceptance_case: ""
+  flow_steps:
+    - flow_step_id: "FLOW-001-S01"
+      actor: ""
+      original_step: ""
+      operation_type: "online" # online | offline | mixed
+      controller_destination: ""
+      service_validation: ""
+      data_changes: []
+      state_change: ""
+      transaction_id: ""
+      failure_outcomes: []
+      file_locations: []
+
+verification:
+  specification_checks:
+    naming_complete: false
+    requirement_coverage_complete: false
+    flow_traceability_complete: false
+    permissions_complete: false
+    fields_complete: false
+    queries_complete: false
+    frontend_contract_complete: false
+    actions_complete: false
+    states_complete: false
+    transactions_complete: false
+    files_known: false
+  implementation_checks:
+    no_template_placeholders: false
+    package_paths_valid: false
+    entity_sql_aligned: false
+    controller_permissions_aligned: false
+    dao_mapper_aligned: false
+    backend_compiles: false
+    business_invariants_verified: false
+  backend_compile_command: ""
+  sql_generated: false
+  sql_executed: false
+  frontend_contract_verified: false
+  unverified_items: []
+
+assumptions: []
+unresolved_questions: []

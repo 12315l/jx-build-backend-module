@@ -1,0 +1,66 @@
+specification:
+  version: "1.0"
+  status: "authorized"
+  project_name: "通用后台管理试验"
+  module_spec_id: "TRIAL-QUICK-001"
+  implementation_authorized: true
+
+module_identity:
+  chinese_name: "资产分类"
+  pascal_name: "AssetCategoryTrial"
+  camel_name: "assetCategoryTrial"
+  snake_name: "asset_category_trial"
+  generation_profile: "quick_crud"
+  operation_mode: "create_new"
+  table_strategy: "create_table"
+
+roles:
+  - role_code: "admin"
+    role_name: "系统管理员"
+    operations: ["分页查询", "新增", "修改", "删除"]
+    data_scope: "all"
+
+persistence:
+  fields:
+    - {business_name: "分类名称", property_name: "name", column_name: "name", java_type: "String", sql_type: "VARCHAR(100)"}
+    - {business_name: "分类说明", property_name: "description", column_name: "description", java_type: "String", sql_type: "VARCHAR(500)"}
+    - {business_name: "排序", property_name: "sort", column_name: "sort", java_type: "Integer", sql_type: "INT"}
+    - {business_name: "启用状态", property_name: "status", column_name: "status", java_type: "Integer", sql_type: "INT"}
+
+template_capability_switches:
+  admin_details: false
+  admin_page: true
+  create: true
+  edit: true
+  remove: true
+  public_details: false
+  public_page: false
+  recover: false
+  batch_status: false
+  batch_sort: false
+  low_code_metadata: true
+  excel_import: false
+  excel_export: false
+  permission_sql: true
+
+queries:
+  - {query_id: "QUERY-001", name: "资产分类分页", endpoint: "/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}
+
+business_actions: []
+frontend_contract: {in_scope: false, source_status: "not_applicable"}
+
+generated_files:
+  mandatory:
+    - "base-framework/src/main/java/system/store/functionModule/AssetCategoryTrialModule/controller/AssetCategoryTrialController.java"
+    - "base-framework/src/main/java/system/store/functionModule/AssetCategoryTrialModule/service/AssetCategoryTrialService.java"
+    - "base-framework/src/main/java/system/store/functionModule/AssetCategoryTrialModule/dao/AssetCategoryTrialDao.java"
+    - "base-framework/src/main/java/system/store/functionModule/AssetCategoryTrialModule/model/entity/AssetCategoryTrial.java"
+    - "base-framework/src/main/java/system/store/functionModule/AssetCategoryTrialModule/db/c_asset_category_trial_table.sql"
+
+requirement_traceability:
+  features:
+    - {requirement_id: "REQ-ADMIN-001", role: "系统管理员", original_feature: "维护资产分类", target_module: "AssetCategoryTrialModule"}
+  flow_steps: []
+
+verification: {specification_checks: {}, implementation_checks: {}}
+unresolved_questions: []

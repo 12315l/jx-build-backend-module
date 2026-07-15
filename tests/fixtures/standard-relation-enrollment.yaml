@@ -1,0 +1,86 @@
+specification:
+  version: "1.0"
+  status: "authorized"
+  project_name: "课程报名试验"
+  module_spec_id: "TRIAL-RELATION-001"
+  implementation_authorized: true
+
+module_identity:
+  chinese_name: "课程报名"
+  pascal_name: "CourseEnrollmentTrial"
+  camel_name: "courseEnrollmentTrial"
+  snake_name: "course_enrollment_trial"
+  generation_profile: "standard_relation"
+  operation_mode: "create_new"
+  table_strategy: "create_table"
+
+roles:
+  - {role_code: "user", role_name: "普通用户", operations: ["提交报名", "查看本人报名"], data_scope: "self"}
+  - {role_code: "admin", role_name: "系统管理员", operations: ["查看全部报名"], data_scope: "all"}
+
+dependencies:
+  base_modules: ["userModule"]
+  business_modules: ["CourseModule"]
+
+persistence:
+  fields:
+    - {business_name: "课程编号", property_name: "courseId", column_name: "course_id", java_type: "Integer", sql_type: "INT", association: {enabled: true, target_module: "CourseModule", target_entity: "Course", target_property: "id"}}
+    - {business_name: "报名用户", property_name: "userId", column_name: "user_id", java_type: "Integer", sql_type: "INT", association: {enabled: true, target_module: "userModule", target_entity: "User", target_property: "id"}}
+    - {business_name: "联系电话", property_name: "contactPhone", column_name: "contact_phone", java_type: "String", sql_type: "VARCHAR(20)"}
+    - {business_name: "报名时间", property_name: "enrollTime", column_name: "enroll_time", java_type: "Date", sql_type: "DATETIME"}
+
+template_capability_switches:
+  admin_details: false
+  admin_page: true
+  create: false
+  edit: false
+  remove: false
+  public_details: false
+  public_page: false
+  recover: false
+  batch_status: false
+  batch_sort: false
+  low_code_metadata: false
+  excel_import: false
+  excel_export: false
+  permission_sql: true
+
+queries:
+  - {query_id: "QUERY-001", name: "后台课程报名分页", endpoint: "/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}
+  - {query_id: "QUERY-002", name: "本人报名分页", endpoint: "/my/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}
+
+business_actions:
+  - action_id: "ACTION-001"
+    name: "提交报名"
+    endpoint: "/submit"
+    http_method: "POST"
+    access: "authenticated"
+    authority: ""
+    allowed_roles: ["user"]
+    request_type: "dto"
+    request_class: "CourseEnrollmentSubmitDTO"
+    transaction_required: false
+invariants:
+  - {invariant_id: "INV-001", description: "同一用户不能重复报名同一课程", enforcement_layer: "service_and_database", implementation_location: "CourseEnrollmentTrialService"}
+frontend_contract: {in_scope: false, source_status: "not_applicable"}
+
+generated_files:
+  mandatory:
+    - "base-framework/src/main/java/system/store/functionModule/CourseEnrollmentTrialModule/controller/CourseEnrollmentTrialController.java"
+    - "base-framework/src/main/java/system/store/functionModule/CourseEnrollmentTrialModule/service/CourseEnrollmentTrialService.java"
+    - "base-framework/src/main/java/system/store/functionModule/CourseEnrollmentTrialModule/dao/CourseEnrollmentTrialDao.java"
+    - "base-framework/src/main/java/system/store/functionModule/CourseEnrollmentTrialModule/model/entity/CourseEnrollmentTrial.java"
+    - "base-framework/src/main/java/system/store/functionModule/CourseEnrollmentTrialModule/db/c_course_enrollment_trial_table.sql"
+  conditional:
+    dto_files:
+      - "base-framework/src/main/java/system/store/functionModule/CourseEnrollmentTrialModule/model/dto/CourseEnrollmentSubmitDTO.java"
+    vo_files: []
+    mapper_xml: ""
+
+requirement_traceability:
+  features:
+    - {requirement_id: "REQ-USER-001", role: "普通用户", original_feature: "提交并查看本人课程报名", target_module: "CourseEnrollmentTrialModule"}
+  flow_steps: []
+
+verification: {specification_checks: {}, implementation_checks: {}}
+unresolved_questions: []
