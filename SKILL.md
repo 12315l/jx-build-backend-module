@@ -1,6 +1,6 @@
 ---
 name: jx-build-backend-module
-description: Create, enhance, and audit full-stack business modules for this Spring Boot, MyBatis-Plus, and Vue low-code platform. Use when Codex receives role-based feature lists, core business flows, project requirements, or existing code and needs to produce module specifications; generate Controller, Service, DAO, Entity, SQL, DTO, VO, or Mapper XML under system.store.functionModule; or configure matching admin pages, user-facing pages, service calls, and theme variables in jx-template-admin or jx-template-front.
+description: Create, enhance, audit, and summarize full-stack business modules for this Spring Boot, MyBatis-Plus, and Vue low-code platform. Use when Codex receives incomplete module ideas, role-based feature lists, core business flows, project requirements, or existing code and needs to draft a complete implementation request; produce module specifications; generate Controller, Service, DAO, Entity, SQL, DTO, VO, or Mapper XML under system.store.functionModule; configure matching admin pages, user-facing pages, service calls, and theme variables in jx-template-admin or jx-template-front; or turn verified functionality into a concise Chinese system-design summary organized by roles and core closed-loop flows without exposing code terminology.
 ---
 
 # Build Low-Code Business Modules
@@ -65,6 +65,18 @@ Read [references/requirements-to-code.md](references/requirements-to-code.md) co
 Use [assets/project-requirement-template.md](assets/project-requirement-template.md) when the user needs a reusable business input form. Use [assets/requirement-traceability-template.md](assets/requirement-traceability-template.md) for a readable review document and [assets/project-traceability-template.yaml](assets/project-traceability-template.yaml) for the machine-checkable source of feature coverage, flow-to-code mappings, conflicts, decisions, and verification results.
 
 Complete project-level traceability before splitting a project into module specifications. Do not create one backend module per role; group shared business objects and vary Controller permissions and data scopes.
+
+## Draft a complete new-module request
+
+Read [assets/new-module-request-template.md](assets/new-module-request-template.md) completely when the user says they want to add a module but do not know how to describe it, asks for a requirement template, provides only a short module idea, or asks Codex to polish a module request before implementation.
+
+- Accept a minimal input containing the module name, intended roles, main operations, and record contents. Use known project facts to complete wording, but do not invent business relationships, workflows, permissions, or fields.
+- Return one polished implementation-ready requirement paragraph in the bundled template's order: purpose and roles, operations, queries, fields, relationships, explicit exclusions, output path, frontend scope, and SQL execution scope.
+- Consolidate only outcome-changing unknowns into one short clarification request. Do not ask the user to supply Java naming, package syntax, routine CRUD terminology, or other details the Skill can derive safely.
+- Distinguish `independent module` from `related module` explicitly. For a related module, name the actual related object and the direction of the relationship. For an independent module, state which nearby existing flows must remain unaffected.
+- State exclusions positively and precisely. Never add预约、审核、支付、消息、时间冲突、库存变化、前台页面, or other common capabilities merely because they occur in similar projects.
+- Use the canonical package `system.store.functionModule.<PascalName>Module` unless the current project or user specifies a verified exception.
+- If the user asks only for a template or polished requirement, do not generate code. If the user explicitly asks to implement the completed request, continue through specification and authorization gates without asking for redundant confirmation.
 
 ## Build a module specification
 
@@ -186,6 +198,21 @@ Before implementation, produce:
 After implementation, update both matrices with actual file locations and verification results.
 
 Run the traceability mapping gate before creating module specifications. It must reject duplicate or malformed IDs, missing module ownership, online steps without Controller and Service destinations, mixed steps without a named human confirmation, pure offline steps that claim automatic state changes, missing evidence files, and removed capabilities without a disposition. A successful mapping gate means the mapping is structurally complete; it does not mean the implementation is verified.
+
+## Summarize verified system functionality
+
+Read [assets/system-design-summary-prompt.md](assets/system-design-summary-prompt.md) completely when the user asks for a system design summary, role-based functionality description, functional overview, core process description, graduation-project functional document, or a business-language explanation of the implemented system.
+
+Before writing the summary:
+
+1. Apply the user's latest corrections and explicit removals first.
+2. Treat the supplied role/module tree as the requested coverage boundary, then inspect the current Controller, Service, Entity, SQL, permissions, and matching frontend pages to verify what is truly implemented.
+3. Include every confirmed menu and function in scope. Add a menu omitted from the input only when current project evidence proves it exists and belongs in the requested document.
+4. Build an internal evidence map from role and function to actual code behavior. Do not expose field names, class names, table names, methods, numeric state codes, routes, or permission strings in the final business document.
+5. Select only genuine end-to-end flows. Describe offline cooperation, inventory changes, approvals, payments, messages, or state transitions only when requirements and code both support them.
+6. Use the bundled prompt's exact output structure and length limits. If evidence cannot support two or three closed loops, do not invent extra flows merely to meet the count; report the evidence gap concisely instead.
+
+Keep the final summary separate from technical audit notes. Translate verified checks, quantity changes, and state transitions into natural user-and-administrator language without weakening or expanding the actual behavior.
 
 ## Never invent behavior
 
