@@ -1,0 +1,142 @@
+specification:
+  version: "1.0"
+  status: "authorized"
+  project_name: "业务流程试验"
+  module_spec_id: "TRIAL-WORKFLOW-001"
+  implementation_authorized: true
+
+module_identity:
+  chinese_name: "报修工单"
+  pascal_name: "RepairWorkOrderTrial"
+  camel_name: "repairWorkOrderTrial"
+  snake_name: "repair_work_order_trial"
+  generation_profile: "business_workflow"
+  operation_mode: "create_new"
+  table_strategy: "create_table"
+
+roles:
+  - {role_code: "user", role_name: "普通用户", operations: ["提交报修", "查看本人报修"], data_scope: "self"}
+  - {role_code: "admin", role_name: "系统管理员", operations: ["受理工单", "完成工单"], data_scope: "all"}
+
+dependencies:
+  base_modules: ["userModule"]
+  business_modules: []
+
+persistence:
+  fields:
+    - {business_name: "报修用户", property_name: "userId", column_name: "user_id", java_type: "Integer", sql_type: "INT", association: {enabled: true, target_module: "userModule", target_entity: "User", target_property: "id"}}
+    - {business_name: "问题标题", property_name: "title", column_name: "title", java_type: "String", sql_type: "VARCHAR(100)"}
+    - {business_name: "问题描述", property_name: "description", column_name: "description", java_type: "String", sql_type: "VARCHAR(1000)"}
+    - {business_name: "处理状态", property_name: "workStatus", column_name: "work_status", java_type: "Integer", sql_type: "INT"}
+    - {business_name: "处理说明", property_name: "handleNote", column_name: "handle_note", java_type: "String", sql_type: "VARCHAR(500)"}
+    - {business_name: "完成时间", property_name: "completeTime", column_name: "complete_time", java_type: "Date", sql_type: "DATETIME"}
+
+template_capability_switches:
+  admin_details: false
+  admin_page: true
+  create: false
+  edit: false
+  remove: false
+  public_details: false
+  public_page: false
+  recover: false
+  batch_status: false
+  batch_sort: false
+  low_code_metadata: false
+  excel_import: false
+  excel_export: false
+  permission_sql: true
+
+permission_menu:
+  enabled: true
+  strategy: "create_module_directory"
+  match_type: 2
+  directory: {name: "报修工单管理", permission_code: "manage:dir:repairWorkOrderTrial", permission_type: 0, router_path: "/main/modules/repairWorkOrderTrial/pages", parent_id: null, parent_router: null}
+  existing_parent: {permission_code: "", required: false}
+  page: {name: "报修工单管理", permission_code: "manage:page:repairWorkOrderTrial:base", permission_type: 1, router_path: "/main/modules/repairWorkOrderTrial/pages/base", parent_permission_code: "manage:dir:repairWorkOrderTrial", parent_router: "/main/modules/repairWorkOrderTrial/pages"}
+  buttons:
+    - {action: "accept", name: "受理工单", permission_code: "manage:btn:repairWorkOrderTrial:accept", permission_type: 2, parent_permission_code: "manage:page:repairWorkOrderTrial:base", parent_router: "/main/modules/repairWorkOrderTrial/pages/base"}
+    - {action: "complete", name: "完成工单", permission_code: "manage:btn:repairWorkOrderTrial:complete", permission_type: 2, parent_permission_code: "manage:page:repairWorkOrderTrial:base", parent_router: "/main/modules/repairWorkOrderTrial/pages/base"}
+  idempotent_by_permission_code: true
+  fixed_parent_id_allowed: false
+
+queries:
+  - {query_id: "QUERY-001", name: "后台工单分页", endpoint: "/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}
+  - {query_id: "QUERY-002", name: "本人工单分页", endpoint: "/my/page", http_method: "GET", request_type: "CommonPage", implementation: "mybatis_plus"}
+
+business_actions:
+  - action_id: "ACTION-001"
+    name: "提交报修"
+    endpoint: "/submit"
+    http_method: "POST"
+    access: "authenticated"
+    authority: ""
+    allowed_roles: ["user"]
+    request_type: "dto"
+    request_class: "RepairSubmitDTO"
+    source_states: []
+    target_state: 0
+    transaction_required: false
+  - action_id: "ACTION-002"
+    name: "受理工单"
+    endpoint: "/accept/{id}"
+    http_method: "POST"
+    access: "authority"
+    authority: "manage:btn:repairWorkOrderTrial:accept"
+    allowed_roles: ["admin"]
+    source_states: [0]
+    target_state: 1
+    transaction_required: true
+  - action_id: "ACTION-003"
+    name: "完成工单"
+    endpoint: "/complete/{id}"
+    http_method: "POST"
+    access: "authority"
+    authority: "manage:btn:repairWorkOrderTrial:complete"
+    allowed_roles: ["admin"]
+    request_type: "dto"
+    request_class: "RepairCompleteDTO"
+    source_states: [1]
+    target_state: 2
+    transaction_required: true
+
+state_machine:
+  enabled: true
+  state_property: "workStatus"
+  states:
+    - {code: 0, business_name: "待处理", initial: true, terminal: false}
+    - {code: 1, business_name: "处理中", initial: false, terminal: false}
+    - {code: 2, business_name: "已完成", initial: false, terminal: true}
+  transitions:
+    - {transition_id: "TRANSITION-001", action_id: "ACTION-002", from_states: [0], to_state: 1, actor_roles: ["admin"]}
+    - {transition_id: "TRANSITION-002", action_id: "ACTION-003", from_states: [1], to_state: 2, actor_roles: ["admin"]}
+
+transactions:
+  - {transaction_id: "TX-001", action_id: "ACTION-002", records_changed: ["报修工单"], must_succeed_together: ["状态与受理信息"]}
+  - {transaction_id: "TX-002", action_id: "ACTION-003", records_changed: ["报修工单"], must_succeed_together: ["状态、处理说明和完成时间"]}
+
+frontend_contract: {in_scope: false, source_status: "not_applicable"}
+generated_files:
+  mandatory:
+    - "base-framework/src/main/java/system/store/functionModule/RepairWorkOrderTrialModule/controller/RepairWorkOrderTrialController.java"
+    - "base-framework/src/main/java/system/store/functionModule/RepairWorkOrderTrialModule/service/RepairWorkOrderTrialService.java"
+    - "base-framework/src/main/java/system/store/functionModule/RepairWorkOrderTrialModule/dao/RepairWorkOrderTrialDao.java"
+    - "base-framework/src/main/java/system/store/functionModule/RepairWorkOrderTrialModule/model/entity/RepairWorkOrderTrial.java"
+    - "base-framework/src/main/java/system/store/functionModule/RepairWorkOrderTrialModule/db/c_repair_work_order_trial_table.sql"
+  conditional:
+    dto_files:
+      - "base-framework/src/main/java/system/store/functionModule/RepairWorkOrderTrialModule/model/dto/RepairSubmitDTO.java"
+      - "base-framework/src/main/java/system/store/functionModule/RepairWorkOrderTrialModule/model/dto/RepairCompleteDTO.java"
+    vo_files: []
+    mapper_xml: ""
+
+requirement_traceability:
+  features:
+    - {requirement_id: "REQ-USER-001", role: "普通用户", original_feature: "提交并查看本人报修", target_module: "RepairWorkOrderTrialModule"}
+    - {requirement_id: "REQ-ADMIN-001", role: "系统管理员", original_feature: "受理并完成报修工单", target_module: "RepairWorkOrderTrialModule"}
+  flow_steps:
+    - {flow_step_id: "FLOW-001-S01", actor: "普通用户", original_step: "在线提交报修", operation_type: "online", controller_destination: "RepairWorkOrderTrialController", service_validation: "当前用户与必填内容", data_changes: ["新增待处理工单"]}
+    - {flow_step_id: "FLOW-001-S02", actor: "系统管理员", original_step: "线下处理后在线确认完成", operation_type: "mixed", controller_destination: "RepairWorkOrderTrialController", service_validation: "工单正在处理中", data_changes: ["记录处理结果"]}
+
+verification: {specification_checks: {}, implementation_checks: {}}
+unresolved_questions: []

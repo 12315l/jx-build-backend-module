@@ -1,0 +1,4 @@
+interface:
+  display_name: "低代码业务模块构建助手"
+  short_description: "整理需求并生成、验收、总结低代码平台业务模块"
+  default_prompt: "使用 $jx-build-backend-module 整理不完整的模块需求，形成可实施规格，生成或验收匹配平台规范的前后端代码，并可按真实实现输出角色功能与核心闭环总结。"

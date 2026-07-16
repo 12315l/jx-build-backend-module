@@ -1,0 +1,358 @@
+traceability:
+  version: "1.0"
+  status: "mapped"
+  project_name: "青训球员数据可视化分析平台"
+  requirement_version: "2026-07-role-flow-baseline"
+  requirement_source: "用户提供的三角色功能清单、三条核心流程及两项删除修正"
+  inspected_project_root: "base-framework"
+  latest_correction_date: "2026-07-14"
+  forbidden_capabilities: ["结课荣誉奖励", "战术替补名单", "二维码", "定位签到", "真实支付", "在线退款"]
+
+anchors:
+  user_base: &user_base
+    target_module: "用户公共能力"
+    ownership: "base_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: true
+    no_code_reason: "复用平台用户与个人资料能力，不创建重复业务模块"
+    mapping: {controller_file: "base-framework/src/main/java/system/store/baseModule/userModule/controller/UserController.java", endpoint: "@RequestMapping(\"/user\")", service_file: "base-framework/src/main/java/system/store/baseModule/userModule/service/MyUserService.java", service_method: "class MyUserService", data_files: [], permission: "登录身份"}
+    evidence_files: ["base-framework/src/main/java/system/store/baseModule/userModule/controller/UserController.java", "base-framework/src/main/java/system/store/baseModule/userModule/service/MyUserService.java"]
+    acceptance_cases: ["按当前身份完成操作，且不能修改他人个人资料"]
+  admin_user: &admin_user
+    target_module: "用户管理公共能力"
+    ownership: "base_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: true
+    no_code_reason: "复用平台用户、角色与权限管理能力"
+    mapping: {controller_file: "base-framework/src/main/java/system/store/baseModule/userModule/controller/AdminController.java", endpoint: "@RequestMapping(\"/admin/service\")", service_file: "base-framework/src/main/java/system/store/baseModule/userModule/service/AdminService.java", service_method: "class AdminService", data_files: [], permission: "后台权限"}
+    evidence_files: ["base-framework/src/main/java/system/store/baseModule/userModule/controller/AdminController.java", "base-framework/src/main/java/system/store/baseModule/userModule/service/AdminService.java"]
+    acceptance_cases: ["管理员可维护授权范围内账号，普通角色不可进入"]
+  system_info: &system_info
+    target_module: "系统展示公共能力"
+    ownership: "base_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: true
+    no_code_reason: "复用平台资讯与轮播展示能力"
+    mapping: {controller_file: "base-framework/src/main/java/system/store/baseModule/systemModule/controller/SystemController.java", endpoint: "@RequestMapping(\"/system\")", service_file: "base-framework/src/main/java/system/store/baseModule/systemModule/service/SystemService.java", service_method: "class SystemService", data_files: ["base-framework/src/main/java/system/store/baseModule/systemModule/model/entity/Information.java"], permission: "公开查看、后台维护"}
+    evidence_files: ["base-framework/src/main/java/system/store/baseModule/systemModule/controller/SystemController.java", "base-framework/src/main/java/system/store/baseModule/systemModule/service/SystemService.java"]
+    acceptance_cases: ["前台只展示已维护内容，后台可完成对应资料维护"]
+  course: &course
+    target_module: "CourseModule"
+    ownership: "business_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/CourseModule/controller/CourseController.java", endpoint: "@RequestMapping(\"/course\")", service_file: "base-framework/src/main/java/system/store/functionModule/CourseModule/service/CourseService.java", service_method: "class CourseService", data_files: ["base-framework/src/main/java/system/store/functionModule/CourseModule/model/entity/Course.java"], permission: "按角色入口与负责教练范围"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/CourseModule/controller/CourseController.java", "base-framework/src/main/java/system/store/functionModule/CourseModule/service/CourseService.java"]
+    acceptance_cases: ["能查看或维护课程，且教练数据范围不越界"]
+  schedule: &schedule
+    target_module: "CourseScheduleModule"
+    ownership: "business_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/CourseScheduleModule/controller/CourseScheduleController.java", endpoint: "@RequestMapping(\"/courseSchedule\")", service_file: "base-framework/src/main/java/system/store/functionModule/CourseScheduleModule/service/CourseScheduleService.java", service_method: "class CourseScheduleService", data_files: ["base-framework/src/main/java/system/store/functionModule/CourseScheduleModule/model/entity/CourseSchedule.java"], permission: "课程课时维护权限"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/CourseScheduleModule/controller/CourseScheduleController.java", "base-framework/src/main/java/system/store/functionModule/CourseScheduleModule/service/CourseScheduleService.java"]
+    acceptance_cases: ["课时与所属课程一致，批量排课生成预期日期"]
+  order: &order
+    target_module: "CourseOrderModule"
+    ownership: "business_module"
+    coverage_status: "partial"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/CourseOrderModule/controller/CourseOrderController.java", endpoint: "@RequestMapping(\"/courseOrder\")", service_file: "base-framework/src/main/java/system/store/functionModule/CourseOrderModule/service/CourseOrderService.java", service_method: "class CourseOrderService", data_files: ["base-framework/src/main/java/system/store/functionModule/CourseOrderModule/model/entity/CourseOrder.java", "base-framework/src/main/java/system/store/functionModule/CourseOrderModule/db/c_course_order_table.sql"], permission: "本人、本人课程或全量管理"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/CourseOrderModule/controller/CourseOrderController.java", "base-framework/src/main/java/system/store/functionModule/CourseOrderModule/service/CourseOrderService.java"]
+    acceptance_cases: ["重复报名被拒绝，结课结果与考勤和成绩一致"]
+  attendance: &attendance
+    target_module: "AttendanceModule"
+    ownership: "business_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/AttendanceModule/controller/AttendanceController.java", endpoint: "@RequestMapping(\"/attendance\")", service_file: "base-framework/src/main/java/system/store/functionModule/AttendanceModule/service/AttendanceService.java", service_method: "class AttendanceService", data_files: ["base-framework/src/main/java/system/store/functionModule/AttendanceModule/model/entity/Attendance.java"], permission: "本人签到、本人课程复核或全量管理"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/AttendanceModule/controller/AttendanceController.java", "base-framework/src/main/java/system/store/functionModule/AttendanceModule/service/AttendanceService.java"]
+    acceptance_cases: ["无报名资格或重复签到被拒绝，复核只作用于允许范围"]
+  player: &player
+    target_module: "PlayerDataModule"
+    ownership: "business_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/PlayerDataModule/controller/PlayerDataController.java", endpoint: "@RequestMapping(\"/playerData\")", service_file: "base-framework/src/main/java/system/store/functionModule/PlayerDataModule/service/PlayerDataService.java", service_method: "class PlayerDataService", data_files: ["base-framework/src/main/java/system/store/functionModule/PlayerDataModule/model/entity/PlayerData.java"], permission: "本人、所带学员或全量管理"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/PlayerDataModule/controller/PlayerDataController.java", "base-framework/src/main/java/system/store/functionModule/PlayerDataModule/service/PlayerDataService.java"]
+    acceptance_cases: ["按年度保存能力数据并返回真实成长趋势与训练建议"]
+  team: &team
+    target_module: "SpecialTrainingTeamModule"
+    ownership: "business_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/SpecialTrainingTeamModule/controller/SpecialTrainingTeamController.java", endpoint: "@RequestMapping(\"/specialTrainingTeam\")", service_file: "base-framework/src/main/java/system/store/functionModule/SpecialTrainingTeamModule/service/SpecialTrainingTeamService.java", service_method: "class SpecialTrainingTeamService", data_files: ["base-framework/src/main/java/system/store/functionModule/SpecialTrainingTeamModule/model/entity/SpecialTrainingTeam.java"], permission: "本人负责队伍或全量管理"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/SpecialTrainingTeamModule/controller/SpecialTrainingTeamController.java", "base-framework/src/main/java/system/store/functionModule/SpecialTrainingTeamModule/service/SpecialTrainingTeamService.java"]
+    acceptance_cases: ["队伍负责人和角色数据范围一致"]
+  member: &member
+    target_module: "SpecialTrainingMemberModule"
+    ownership: "business_module"
+    coverage_status: "partial"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/SpecialTrainingMemberModule/controller/SpecialTrainingMemberController.java", endpoint: "@RequestMapping(\"/specialTrainingMember\")", service_file: "base-framework/src/main/java/system/store/functionModule/SpecialTrainingMemberModule/service/SpecialTrainingMemberService.java", service_method: "class SpecialTrainingMemberService", data_files: ["base-framework/src/main/java/system/store/functionModule/SpecialTrainingMemberModule/model/entity/SpecialTrainingMember.java"], permission: "本人负责队伍或全量管理"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/SpecialTrainingMemberModule/controller/SpecialTrainingMemberController.java", "base-framework/src/main/java/system/store/functionModule/SpecialTrainingMemberModule/service/SpecialTrainingMemberService.java"]
+    acceptance_cases: ["重复队员不重复加入，推荐范围不超出教练学员范围"]
+  match: &match
+    target_module: "MatchModule"
+    ownership: "business_module"
+    coverage_status: "partial"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchController.java", endpoint: "@RequestMapping(\"/match\")", service_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchService.java", service_method: "class MatchService", data_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/model/entity/Match.java"], permission: "参赛队相关查看或全量管理"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchController.java", "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchService.java"]
+    acceptance_cases: ["比赛与队伍关联，结果和总结可按权限维护"]
+  lineup: &lineup
+    target_module: "MatchModule"
+    ownership: "business_module"
+    coverage_status: "partial"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchLineupController.java", endpoint: "@RequestMapping(\"/match/lineup\")", service_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchLineupService.java", service_method: "class MatchLineupService", data_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/model/entity/MatchLineup.java"], permission: "负责队伍教练"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchLineupController.java", "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchLineupService.java"]
+    acceptance_cases: ["只保存本队球员的位置与首发安排，不提供替补名单功能"]
+  performance: &performance
+    target_module: "MatchModule"
+    ownership: "business_module"
+    coverage_status: "partial"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchPlayerController.java", endpoint: "@RequestMapping(\"/match/performance\")", service_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchPlayerService.java", service_method: "class MatchPlayerService", data_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/model/entity/MatchPlayer.java"], permission: "负责队伍教练"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchPlayerController.java", "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchPlayerService.java"]
+    acceptance_cases: ["修改复盘时只应用能力差值，避免重复累计"]
+  equipment: &equipment
+    target_module: "EquipmentModule"
+    ownership: "business_module"
+    coverage_status: "partial"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/EquipmentModule/controller/EquipmentController.java", endpoint: "@RequestMapping(\"/equipment\")", service_file: "base-framework/src/main/java/system/store/functionModule/EquipmentModule/service/EquipmentService.java", service_method: "class EquipmentService", data_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentModule/model/entity/Equipment.java"], permission: "登录领取、后台库存维护"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentModule/controller/EquipmentController.java", "base-framework/src/main/java/system/store/functionModule/EquipmentModule/service/EquipmentService.java"]
+    acceptance_cases: ["申请时只检查库存，不提前扣减可用数量"]
+  claim: &claim
+    target_module: "EquipmentClaimModule"
+    ownership: "business_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/controller/EquipmentClaimController.java", endpoint: "@RequestMapping(\"/equipmentClaim\")", service_file: "base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/service/EquipmentClaimService.java", service_method: "class EquipmentClaimService", data_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/model/entity/EquipmentClaim.java", "base-framework/src/main/java/system/store/functionModule/EquipmentModule/model/entity/OutInRecord.java"], permission: "本人记录、后台确认与核销"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/controller/EquipmentClaimController.java", "base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/service/EquipmentClaimService.java"]
+    acceptance_cases: ["发放、正常归还、损坏和丢失数量守恒且留下流转记录"]
+  forum: &forum
+    target_module: "ForumModule"
+    ownership: "business_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/ForumModule/controller/ForumController.java", endpoint: "@RequestMapping(\"/forum\")", service_file: "base-framework/src/main/java/system/store/functionModule/ForumModule/service/ForumService.java", service_method: "class ForumService", data_files: ["base-framework/src/main/java/system/store/functionModule/ForumModule/model/entity/Forum.java"], permission: "前台交流、后台内容管理"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/ForumModule/controller/ForumController.java", "base-framework/src/main/java/system/store/functionModule/ForumModule/service/ForumService.java"]
+    acceptance_cases: ["帖子按角色范围维护，前台只展示允许内容"]
+  interaction: &interaction
+    target_module: "UserActionModule"
+    ownership: "business_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/UserActionModule/module/LikeModule/controller/LikeController.java", endpoint: "@RequestMapping", service_file: "base-framework/src/main/java/system/store/functionModule/UserActionModule/module/LikeModule/service/LikeService.java", service_method: "class LikeService", data_files: [], permission: "当前登录用户"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/UserActionModule/module/LikeModule/controller/LikeController.java", "base-framework/src/main/java/system/store/functionModule/UserActionModule/module/CollectionModule/controller/CollectionController.java", "base-framework/src/main/java/system/store/functionModule/UserActionModule/module/CommentModule/controller/CommentController.java"]
+    acceptance_cases: ["互动记录只归属于当前用户并可按内容查询"]
+  analyze: &analyze
+    target_module: "AnalyzeModule"
+    ownership: "business_module"
+    coverage_status: "platform_existing"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/AnalyzeModule/controller/AnalyzeController.java", endpoint: "@RequestMapping", service_file: "base-framework/src/main/java/system/store/functionModule/AnalyzeModule/service/AnalyzeService.java", service_method: "class AnalyzeService", data_files: [], permission: "按统计入口授权"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/AnalyzeModule/controller/AnalyzeController.java", "base-framework/src/main/java/system/store/functionModule/AnalyzeModule/service/AnalyzeService.java"]
+    acceptance_cases: ["统计指标来自现有业务数据并正确处理空数据"]
+
+features:
+  - {<<: *user_base, requirement_id: "REQ-STUDENT-001", role: "学员", name: "注册登录", original_requirement: "完成账号注册和身份验证，安全进入个人学习空间。", action_type: "submit", data_scope: "本人"}
+  - {<<: *analyze, requirement_id: "REQ-STUDENT-002", role: "学员", name: "首页展示", original_requirement: "集中查看俱乐部重点内容及平台服务入口。", action_type: "view", data_scope: "公开与本人概览"}
+  - {<<: *system_info, requirement_id: "REQ-STUDENT-003", role: "学员", name: "新闻资讯", original_requirement: "分类浏览俱乐部新闻、训练动态及详细内容。", action_type: "view", data_scope: "公开内容"}
+  - {<<: *course, requirement_id: "REQ-STUDENT-004", role: "学员", name: "课程中心", original_requirement: "查询课程与教练信息并自主提交报名申请。", action_type: "submit", data_scope: "开放课程"}
+  - {<<: *order, requirement_id: "REQ-STUDENT-005", role: "学员", name: "我的课程", original_requirement: "查看已报名课程、训练课时及结课结果。", action_type: "view", data_scope: "本人"}
+  - {<<: *attendance, requirement_id: "REQ-STUDENT-006", role: "学员", name: "上课签到", original_requirement: "按课时完成签到并等待教练复核出勤情况。", action_type: "submit", data_scope: "本人已报名课程"}
+  - {<<: *attendance, requirement_id: "REQ-STUDENT-007", role: "学员", name: "考勤记录", original_requirement: "查看自主签到、教练补录及历史考勤结果。", action_type: "view", data_scope: "本人"}
+  - {<<: *player, requirement_id: "REQ-STUDENT-008", role: "学员", name: "能力档案", original_requirement: "维护个人技术、身体和精神能力评估数据。", action_type: "maintain", data_scope: "本人"}
+  - {<<: *player, requirement_id: "REQ-STUDENT-009", role: "学员", name: "成长追踪", original_requirement: "按年度记录身体指标并查看历年成长趋势。", action_type: "view", data_scope: "本人"}
+  - {<<: *player, requirement_id: "REQ-STUDENT-010", role: "学员", name: "训练建议", original_requirement: "根据当前能力短板查看重点加强方向。", action_type: "view", data_scope: "本人"}
+  - {<<: *match, requirement_id: "REQ-STUDENT-011", role: "学员", name: "比赛中心", original_requirement: "查看比赛安排、战术阵容及球员实战表现。", action_type: "view", data_scope: "本人所在队伍"}
+  - {<<: *equipment, requirement_id: "REQ-STUDENT-012", role: "学员", name: "装备领取", original_requirement: "查看可用装备并按实际需要提交领取申请。", action_type: "submit", data_scope: "可用装备"}
+  - {<<: *claim, requirement_id: "REQ-STUDENT-013", role: "学员", name: "我的装备", original_requirement: "跟踪装备使用情况并在线发起归还申请。", action_type: "submit", data_scope: "本人"}
+  - {<<: *forum, requirement_id: "REQ-STUDENT-014", role: "学员", name: "论坛交流", original_requirement: "发布和浏览帖子，参与评论、点赞及收藏。", action_type: "maintain", data_scope: "公开内容与本人帖子"}
+  - {<<: *interaction, requirement_id: "REQ-STUDENT-015", role: "学员", name: "我的收藏", original_requirement: "集中查看个人收藏的论坛交流内容。", action_type: "view", data_scope: "本人"}
+  - {<<: *interaction, requirement_id: "REQ-STUDENT-016", role: "学员", name: "我的点赞", original_requirement: "集中查看个人点赞的论坛交流内容。", action_type: "view", data_scope: "本人"}
+  - {<<: *user_base, requirement_id: "REQ-STUDENT-017", role: "学员", name: "个人资料", original_requirement: "维护头像、昵称等资料并修改登录密码。", action_type: "maintain", data_scope: "本人"}
+  - requirement_id: "REQ-STUDENT-018"
+    role: "学员"
+    name: "荣誉奖励（已取消）"
+    original_requirement: "不再提供结课勋章和优先选课权益。"
+    action_type: "dedicated"
+    data_scope: "本人"
+    target_module: "RewardModule"
+    ownership: "business_module"
+    coverage_status: "to_remove"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/RewardModule/controller/RewardController.java", endpoint: "@RequestMapping", service_file: "base-framework/src/main/java/system/store/functionModule/RewardModule/service/RewardService.java", service_method: "class RewardService", data_files: ["base-framework/src/main/java/system/store/functionModule/RewardModule/model/entity/Reward.java"], permission: "应从当前需求范围移除"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/RewardModule/controller/RewardController.java", "base-framework/src/main/java/system/store/functionModule/CourseOrderModule/service/CourseOrderService.java"]
+    acceptance_cases: ["结课后不新增奖励记录，学员端不出现奖励入口"]
+    disposition: "移除结课服务中的奖励发放依赖及相关用户入口；是否删除历史表需单独授权"
+
+  - {<<: *course, requirement_id: "REQ-COACH-001", role: "教练", name: "课程管理", original_requirement: "维护本人负责的课程资料及课程展示内容。", action_type: "maintain", data_scope: "本人负责课程"}
+  - {<<: *course, requirement_id: "REQ-COACH-002", role: "教练", name: "课程查看", original_requirement: "查看本人负责课程及对应训练安排。", action_type: "view", data_scope: "本人负责课程"}
+  - {<<: *order, requirement_id: "REQ-COACH-003", role: "教练", name: "报名管理", original_requirement: "查看本人课程学员并维护相关报名记录。", action_type: "maintain", data_scope: "本人负责课程"}
+  - {<<: *order, requirement_id: "REQ-COACH-004", role: "教练", name: "结课考核", original_requirement: "录入学员结课成绩并查看最终评定结果。", action_type: "record", data_scope: "本人负责课程"}
+  - {<<: *attendance, requirement_id: "REQ-COACH-005", role: "教练", name: "考勤管理", original_requirement: "查看本人课程签到并复核学员出勤情况。", action_type: "confirm", data_scope: "本人负责课程"}
+  - {<<: *attendance, requirement_id: "REQ-COACH-006", role: "教练", name: "考勤补录", original_requirement: "结合线下训练情况补录出勤、缺勤或请假。", action_type: "record", data_scope: "本人负责课程"}
+  - {<<: *member, requirement_id: "REQ-COACH-007", role: "教练", name: "学员管理", original_requirement: "查看本人课程及专项训练队中的学员信息。", action_type: "view", data_scope: "本人课程与队伍"}
+  - {<<: *player, requirement_id: "REQ-COACH-008", role: "教练", name: "球员数据", original_requirement: "维护所带学员的身体、技术和精神能力数据。", action_type: "maintain", data_scope: "所带学员"}
+  - {<<: *player, requirement_id: "REQ-COACH-009", role: "教练", name: "能力分析", original_requirement: "查看学员能力分布、综合评价和成长趋势。", action_type: "statistics", data_scope: "所带学员"}
+  - {<<: *team, requirement_id: "REQ-COACH-010", role: "教练", name: "专项训练队", original_requirement: "创建和维护本人负责的专项训练队伍。", action_type: "maintain", data_scope: "本人负责队伍"}
+  - {<<: *member, requirement_id: "REQ-COACH-011", role: "教练", name: "队员管理", original_requirement: "从本人学员范围中选择、加入或移除队员。", action_type: "maintain", data_scope: "本人学员与队伍"}
+  - {<<: *member, requirement_id: "REQ-COACH-012", role: "教练", name: "智能选人", original_requirement: "根据战术方向和球员能力推荐适配人选。", action_type: "dedicated", data_scope: "本人学员"}
+  - {<<: *lineup, requirement_id: "REQ-COACH-013", role: "教练", name: "战术面板", original_requirement: "安排球员场上位置及首发名单。", action_type: "maintain", data_scope: "本人负责队伍"}
+  - {<<: *match, requirement_id: "REQ-COACH-014", role: "教练", name: "比赛查看", original_requirement: "查看本人专项训练队关联的比赛安排。", action_type: "view", data_scope: "本人负责队伍"}
+  - {<<: *performance, requirement_id: "REQ-COACH-015", role: "教练", name: "赛后复盘", original_requirement: "记录球员实战表现、能力变化及赛后点评。", action_type: "record", data_scope: "本人负责队伍"}
+  - {<<: *analyze, requirement_id: "REQ-COACH-016", role: "教练", name: "数据分析", original_requirement: "查看课程报名、学员考勤和训练队规模情况。", action_type: "statistics", data_scope: "本人课程与队伍"}
+  - {<<: *forum, requirement_id: "REQ-COACH-017", role: "教练", name: "论坛交流", original_requirement: "发布并维护论坛内容，参与俱乐部交流互动。", action_type: "maintain", data_scope: "公开内容与本人帖子"}
+  - requirement_id: "REQ-COACH-018"
+    role: "教练"
+    name: "替补名单（已取消）"
+    original_requirement: "战术面板不安排球员替补名单。"
+    action_type: "dedicated"
+    data_scope: "本人负责队伍"
+    target_module: "MatchModule"
+    ownership: "business_module"
+    coverage_status: "to_remove"
+    no_new_backend_code: false
+    no_code_reason: ""
+    mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchLineupController.java", endpoint: "@RequestMapping(\"/match/lineup\")", service_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchLineupService.java", service_method: "class MatchLineupService", data_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/model/entity/MatchLineup.java"], permission: "负责队伍教练"}
+    evidence_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/model/entity/MatchLineup.java", "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchLineupService.java"]
+    acceptance_cases: ["战术面板不展示、不提交、不保存替补名单"]
+    disposition: "保留场上位置和首发安排，移除替补名单对应交互与数据含义"
+
+  - {<<: *analyze, requirement_id: "REQ-ADMIN-001", role: "系统管理员", name: "数据分析", original_requirement: "汇总学员、教练、课程和比赛运营情况。", action_type: "statistics", data_scope: "全量"}
+  - {<<: *admin_user, requirement_id: "REQ-ADMIN-002", role: "系统管理员", name: "学员管理", original_requirement: "维护学员账号、个人资料及账号使用状态。", action_type: "maintain", data_scope: "全量学员"}
+  - {<<: *admin_user, requirement_id: "REQ-ADMIN-003", role: "系统管理员", name: "教练管理", original_requirement: "维护教练账号、个人资料及角色归属关系。", action_type: "maintain", data_scope: "全量教练"}
+  - {<<: *admin_user, requirement_id: "REQ-ADMIN-004", role: "系统管理员", name: "用户管理", original_requirement: "统一维护平台用户及其账号启用情况。", action_type: "maintain", data_scope: "全量用户"}
+  - {<<: *admin_user, requirement_id: "REQ-ADMIN-005", role: "系统管理员", name: "角色管理", original_requirement: "设置不同角色的业务范围和访问权限。", action_type: "maintain", data_scope: "全量角色"}
+  - {<<: *admin_user, requirement_id: "REQ-ADMIN-006", role: "系统管理员", name: "菜单管理", original_requirement: "维护前后台功能入口及角色可见范围。", action_type: "maintain", data_scope: "全量菜单权限"}
+  - {<<: *system_info, requirement_id: "REQ-ADMIN-007", role: "系统管理员", name: "业务分类管理", original_requirement: "统一维护资讯、论坛、比赛等分类口径。", action_type: "maintain", data_scope: "全量分类"}
+  - {<<: *system_info, requirement_id: "REQ-ADMIN-008", role: "系统管理员", name: "站点展示管理", original_requirement: "维护首页展示图片、名称及说明内容。", action_type: "maintain", data_scope: "全量站点展示"}
+  - {<<: *system_info, requirement_id: "REQ-ADMIN-009", role: "系统管理员", name: "资讯管理", original_requirement: "发布、修改、查询和删除俱乐部资讯内容。", action_type: "maintain", data_scope: "全量资讯"}
+  - {<<: *forum, requirement_id: "REQ-ADMIN-010", role: "系统管理员", name: "论坛管理", original_requirement: "维护论坛帖子并处理内容审核事项。", action_type: "maintain", data_scope: "全量帖子"}
+  - {<<: *system_info, requirement_id: "REQ-ADMIN-011", role: "系统管理员", name: "论坛分类管理", original_requirement: "维护帖子分类及分类展示内容。", action_type: "maintain", data_scope: "全量分类"}
+  - {<<: *course, requirement_id: "REQ-ADMIN-012", role: "系统管理员", name: "课程管理", original_requirement: "维护课程资料、负责教练及课程开放情况。", action_type: "maintain", data_scope: "全量课程"}
+  - {<<: *schedule, requirement_id: "REQ-ADMIN-013", role: "系统管理员", name: "课时管理", original_requirement: "维护训练主题、上课时间和训练地点。", action_type: "maintain", data_scope: "全量课时"}
+  - {<<: *schedule, requirement_id: "REQ-ADMIN-014", role: "系统管理员", name: "批量排课", original_requirement: "按多个训练日期一次生成相应课时安排。", action_type: "dedicated", data_scope: "全量课时"}
+  - {<<: *order, requirement_id: "REQ-ADMIN-015", role: "系统管理员", name: "报名管理", original_requirement: "查看全部报名记录并为指定学员安排课程。", action_type: "maintain", data_scope: "全量报名"}
+  - {<<: *order, requirement_id: "REQ-ADMIN-016", role: "系统管理员", name: "结课管理", original_requirement: "查看课程学习结果并支持结课考核评定。", action_type: "confirm", data_scope: "全量报名"}
+  - {<<: *attendance, requirement_id: "REQ-ADMIN-017", role: "系统管理员", name: "签到管理", original_requirement: "查询、复核和补录全平台学员考勤记录。", action_type: "maintain", data_scope: "全量考勤"}
+  - {<<: *player, requirement_id: "REQ-ADMIN-018", role: "系统管理员", name: "球员数据管理", original_requirement: "维护全部球员能力、身体及成长数据。", action_type: "maintain", data_scope: "全量球员"}
+  - {<<: *team, requirement_id: "REQ-ADMIN-019", role: "系统管理员", name: "专项训练队管理", original_requirement: "维护专项训练队及其负责教练信息。", action_type: "maintain", data_scope: "全量队伍"}
+  - {<<: *member, requirement_id: "REQ-ADMIN-020", role: "系统管理员", name: "专项队员管理", original_requirement: "维护专项训练队与球员之间的归属关系。", action_type: "maintain", data_scope: "全量队伍与球员"}
+  - {<<: *lineup, requirement_id: "REQ-ADMIN-021", role: "系统管理员", name: "团队战术管理", original_requirement: "查看队伍构成并辅助维护比赛阵容。", action_type: "maintain", data_scope: "全量队伍"}
+  - {<<: *match, requirement_id: "REQ-ADMIN-022", role: "系统管理员", name: "比赛管理", original_requirement: "维护比赛时间、地点、对手、队伍及结果。", action_type: "maintain", data_scope: "全量比赛"}
+  - {<<: *match, requirement_id: "REQ-ADMIN-023", role: "系统管理员", name: "比赛总结管理", original_requirement: "维护比赛战报、比赛结果和赛后总结。", action_type: "maintain", data_scope: "全量比赛"}
+  - {<<: *equipment, requirement_id: "REQ-ADMIN-024", role: "系统管理员", name: "装备库存管理", original_requirement: "维护装备资料、总量和当前可用数量。", action_type: "maintain", data_scope: "全量装备"}
+  - {<<: *claim, requirement_id: "REQ-ADMIN-025", role: "系统管理员", name: "装备领取管理", original_requirement: "查看装备申请并确认线下发放情况。", action_type: "confirm", data_scope: "全量领取记录"}
+  - {<<: *claim, requirement_id: "REQ-ADMIN-026", role: "系统管理员", name: "装备归还管理", original_requirement: "验收线下归还装备并完成归还确认。", action_type: "confirm", data_scope: "全量领取记录"}
+  - {<<: *claim, requirement_id: "REQ-ADMIN-027", role: "系统管理员", name: "装备报损管理", original_requirement: "登记损坏或丢失装备并核减装备总量。", action_type: "confirm", data_scope: "全量领取记录"}
+  - {<<: *claim, requirement_id: "REQ-ADMIN-028", role: "系统管理员", name: "装备流转记录", original_requirement: "查看装备发放、归还及报损变动情况。", action_type: "view", data_scope: "全量流转记录"}
+  - {<<: *user_base, requirement_id: "REQ-ADMIN-029", role: "系统管理员", name: "个人资料", original_requirement: "维护管理员个人信息并修改登录密码。", action_type: "maintain", data_scope: "本人"}
+
+flows:
+  - flow_id: "FLOW-001"
+    name: "课程报名、考勤与结课闭环"
+    source_requirement_ids: ["REQ-STUDENT-004", "REQ-STUDENT-005", "REQ-STUDENT-006", "REQ-STUDENT-007", "REQ-COACH-004", "REQ-COACH-005", "REQ-COACH-006", "REQ-ADMIN-012", "REQ-ADMIN-013", "REQ-ADMIN-014", "REQ-ADMIN-015", "REQ-ADMIN-016", "REQ-ADMIN-017"]
+    steps:
+      - {flow_step_id: "FLOW-001-S01", order: 1, actor: "系统管理员", operation_type: "online", original_step: "建立课程并指派负责教练。", target_module: "CourseModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/CourseModule/controller/CourseController.java", endpoint: "@PostMapping(\"/create\")", service_file: "base-framework/src/main/java/system/store/functionModule/CourseModule/service/CourseService.java", service_method: "createNewRow(", data_files: ["base-framework/src/main/java/system/store/functionModule/CourseModule/model/entity/Course.java"]}, validations: ["课程资料和负责教练有效"], data_changes: ["新增课程"], quantity_changes: [], state_change: "形成可维护课程", transaction_boundary: "单课程写入", failure_outcomes: ["资料无效时不保存"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/CourseModule/service/CourseService.java"], acceptance_cases: ["课程保存后可查询且负责人一致"]}
+      - {flow_step_id: "FLOW-001-S02", order: 2, actor: "系统管理员", operation_type: "online", original_step: "安排训练主题、时间和地点，可按多个日期批量排课。", target_module: "CourseScheduleModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/CourseScheduleModule/controller/CourseScheduleController.java", endpoint: "@PostMapping(\"/batchCreate\")", service_file: "base-framework/src/main/java/system/store/functionModule/CourseScheduleModule/service/CourseScheduleService.java", service_method: "batchCreate(", data_files: ["base-framework/src/main/java/system/store/functionModule/CourseScheduleModule/model/entity/CourseSchedule.java"]}, validations: ["课程存在", "训练日期有效"], data_changes: ["新增课时"], quantity_changes: ["按日期生成相应数量课时"], state_change: "课程具备训练安排", transaction_boundary: "批量课时整体写入", failure_outcomes: ["任一关键参数无效则不生成"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/CourseScheduleModule/service/CourseScheduleService.java"], acceptance_cases: ["所选日期各生成一条课时"]}
+      - {flow_step_id: "FLOW-001-S03", order: 3, actor: "学员或系统管理员", operation_type: "online", original_step: "学员自主报名，或管理员为指定学员建立报名记录。", target_module: "CourseOrderModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/CourseOrderModule/controller/CourseOrderController.java", endpoint: "@PostMapping(\"/create\")", service_file: "base-framework/src/main/java/system/store/functionModule/CourseOrderModule/service/CourseOrderService.java", service_method: "createNewRow(", data_files: ["base-framework/src/main/java/system/store/functionModule/CourseOrderModule/model/entity/CourseOrder.java"]}, validations: ["当前身份来源可信", "同一学员同一课程不重复报名"], data_changes: ["新增报名记录并记录来源"], quantity_changes: [], state_change: "形成有效报名", transaction_boundary: "单报名写入", failure_outcomes: ["重复报名时保持原记录不变"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/CourseOrderModule/service/CourseOrderService.java"], acceptance_cases: ["重复提交只保留一条报名"]}
+      - {flow_step_id: "FLOW-001-S04", order: 4, actor: "学员与教练", operation_type: "offline", original_step: "学员按安排到场，教练组织线下训练。", target_module: "CourseScheduleModule", no_new_backend_code: true, no_code_reason: "训练本身在线下完成，系统只保存课时和后续考勤结果", offline_confirmation: "", mapping: {}, validations: [], data_changes: [], quantity_changes: [], state_change: "", transaction_boundary: "无", failure_outcomes: [], evidence_files: [], acceptance_cases: ["文档不虚构定位、二维码或自动感知"]}
+      - {flow_step_id: "FLOW-001-S05", order: 5, actor: "学员", operation_type: "online", original_step: "按课时完成自主签到。", target_module: "AttendanceModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/AttendanceModule/controller/AttendanceController.java", endpoint: "@PostMapping(\"/student/check-in/{scheduleId}\")", service_file: "base-framework/src/main/java/system/store/functionModule/AttendanceModule/service/AttendanceService.java", service_method: "studentCheckIn(", data_files: ["base-framework/src/main/java/system/store/functionModule/AttendanceModule/model/entity/Attendance.java"]}, validations: ["课时存在", "学员已报名", "不得重复签到"], data_changes: ["新增待复核考勤"], quantity_changes: [], state_change: "未签到到待复核", transaction_boundary: "签到记录写入", failure_outcomes: ["无报名资格或重复签到时不写入"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/AttendanceModule/service/AttendanceService.java"], acceptance_cases: ["未报名学员不能签到"]}
+      - {flow_step_id: "FLOW-001-S06", order: 6, actor: "教练", operation_type: "mixed", original_step: "结合现场出勤复核签到，也可补录出勤、缺勤或请假。", target_module: "AttendanceModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "负责课程的教练根据线下到场事实在线复核或补录", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/AttendanceModule/controller/AttendanceController.java", endpoint: "@PostMapping(\"/coach/verify\")", service_file: "base-framework/src/main/java/system/store/functionModule/AttendanceModule/service/AttendanceService.java", service_method: "confirmAttendance(", data_files: ["base-framework/src/main/java/system/store/functionModule/AttendanceModule/model/entity/Attendance.java"]}, validations: ["教练负责对应课程", "考勤记录处于可复核范围"], data_changes: ["记录复核结果与操作人"], quantity_changes: [], state_change: "待复核到出勤、缺勤或请假", transaction_boundary: "单考勤更新", failure_outcomes: ["越权或状态不允许时保持不变"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/AttendanceModule/service/AttendanceService.java"], acceptance_cases: ["其他教练不能复核本课程考勤"]}
+      - {flow_step_id: "FLOW-001-S07", order: 7, actor: "教练", operation_type: "online", original_step: "课程结束后录入学员结课成绩。", target_module: "CourseOrderModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/CourseOrderModule/controller/CourseOrderController.java", endpoint: "@PostMapping(\"/complete\")", service_file: "base-framework/src/main/java/system/store/functionModule/CourseOrderModule/service/CourseOrderService.java", service_method: "completeCourse(", data_files: ["base-framework/src/main/java/system/store/functionModule/CourseOrderModule/model/entity/CourseOrder.java"]}, validations: ["教练负责该课程", "成绩有效", "避免重复结课"], data_changes: ["保存成绩和结课结果"], quantity_changes: [], state_change: "学习中到结课评定", transaction_boundary: "成绩与结课结果同一事务", failure_outcomes: ["越权或重复结课时不改变结果"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/CourseOrderModule/service/CourseOrderService.java"], acceptance_cases: ["结课结果由成绩和整体出勤共同形成且不再发放奖励"]}
+
+  - flow_id: "FLOW-002"
+    name: "专项选拔、比赛复盘与能力成长闭环"
+    source_requirement_ids: ["REQ-COACH-008", "REQ-COACH-009", "REQ-COACH-010", "REQ-COACH-011", "REQ-COACH-012", "REQ-COACH-013", "REQ-COACH-014", "REQ-COACH-015", "REQ-ADMIN-019", "REQ-ADMIN-020", "REQ-ADMIN-021", "REQ-ADMIN-022", "REQ-ADMIN-023"]
+    steps:
+      - {flow_step_id: "FLOW-002-S01", order: 1, actor: "教练", operation_type: "online", original_step: "维护所带学员的身体、技术和精神能力数据。", target_module: "PlayerDataModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/PlayerDataModule/controller/PlayerDataController.java", endpoint: "@PostMapping(\"/edit\")", service_file: "base-framework/src/main/java/system/store/functionModule/PlayerDataModule/service/PlayerDataService.java", service_method: "editRow(", data_files: ["base-framework/src/main/java/system/store/functionModule/PlayerDataModule/model/entity/PlayerData.java"]}, validations: ["学员属于教练数据范围"], data_changes: ["更新能力数据与综合评价"], quantity_changes: [], state_change: "能力档案更新", transaction_boundary: "单年度能力记录", failure_outcomes: ["越权时不更新"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/PlayerDataModule/service/PlayerDataService.java"], acceptance_cases: ["教练不能维护范围外球员"]}
+      - {flow_step_id: "FLOW-002-S02", order: 2, actor: "教练", operation_type: "online", original_step: "创建本人负责的专项训练队。", target_module: "SpecialTrainingTeamModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/SpecialTrainingTeamModule/controller/SpecialTrainingTeamController.java", endpoint: "@PostMapping(\"/create\")", service_file: "base-framework/src/main/java/system/store/functionModule/SpecialTrainingTeamModule/service/SpecialTrainingTeamService.java", service_method: "createNewRow(", data_files: ["base-framework/src/main/java/system/store/functionModule/SpecialTrainingTeamModule/model/entity/SpecialTrainingTeam.java"]}, validations: ["负责人取当前教练或经授权指定"], data_changes: ["新增专项训练队"], quantity_changes: [], state_change: "队伍建立", transaction_boundary: "单队伍写入", failure_outcomes: ["负责人无效时不保存"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/SpecialTrainingTeamModule/service/SpecialTrainingTeamService.java"], acceptance_cases: ["新队伍归属正确教练"]}
+      - {flow_step_id: "FLOW-002-S03", order: 3, actor: "教练", operation_type: "online", original_step: "根据战术方向查看适配球员推荐并维护队员。", target_module: "SpecialTrainingMemberModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/SpecialTrainingMemberModule/controller/SpecialTrainingMemberController.java", endpoint: "@GetMapping(\"/recommend-players\")", service_file: "base-framework/src/main/java/system/store/functionModule/SpecialTrainingMemberModule/service/SpecialTrainingMemberService.java", service_method: "recommendPlayers(", data_files: ["base-framework/src/main/java/system/store/functionModule/SpecialTrainingMemberModule/model/entity/SpecialTrainingMember.java"]}, validations: ["推荐范围限于本人学员", "重复队员不重复加入"], data_changes: ["按确认结果增加或移除队员"], quantity_changes: ["队伍人数随成员关系变化"], state_change: "队伍构成更新", transaction_boundary: "批量成员写入", failure_outcomes: ["无能力数据者不虚构推荐结果"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/SpecialTrainingMemberModule/service/SpecialTrainingMemberService.java"], acceptance_cases: ["推荐和入队均不超出教练学员范围"]}
+      - {flow_step_id: "FLOW-002-S04", order: 4, actor: "系统管理员", operation_type: "online", original_step: "建立比赛并指定参赛专项训练队。", target_module: "MatchModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchController.java", endpoint: "@PostMapping(\"/create\")", service_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchService.java", service_method: "createNewRow(", data_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/model/entity/Match.java"]}, validations: ["参赛队伍存在"], data_changes: ["新增比赛安排"], quantity_changes: [], state_change: "形成比赛安排", transaction_boundary: "单比赛写入", failure_outcomes: ["队伍无效时不保存"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchService.java"], acceptance_cases: ["比赛能按队伍查询"]}
+      - {flow_step_id: "FLOW-002-S05", order: 5, actor: "教练", operation_type: "online", original_step: "安排本队球员场上位置和首发名单。", target_module: "MatchModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchLineupController.java", endpoint: "@PostMapping(\"/save\")", service_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchLineupService.java", service_method: "saveLineup(", data_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/model/entity/MatchLineup.java"]}, validations: ["比赛与队伍关联", "球员属于参赛队", "不接收替补名单能力"], data_changes: ["替换本场阵容位置与首发安排"], quantity_changes: [], state_change: "比赛阵容更新", transaction_boundary: "删除旧阵容与保存新阵容同一事务", failure_outcomes: ["越权或队员不属于本队时不保存"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchLineupService.java"], acceptance_cases: ["只保存场上位置和首发，不出现替补名单"]}
+      - {flow_step_id: "FLOW-002-S06", order: 6, actor: "球员与教练", operation_type: "offline", original_step: "球员完成线下比赛，教练现场观察表现。", target_module: "MatchModule", no_new_backend_code: true, no_code_reason: "比赛行为在线下发生，系统不自动采集", offline_confirmation: "", mapping: {}, validations: [], data_changes: [], quantity_changes: [], state_change: "", transaction_boundary: "无", failure_outcomes: [], evidence_files: [], acceptance_cases: ["不虚构穿戴设备或自动采集"]}
+      - {flow_step_id: "FLOW-002-S07", order: 7, actor: "系统管理员", operation_type: "mixed", original_step: "根据赛后实际情况维护比赛结果和总结。", target_module: "MatchModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "管理员依据线下比赛事实在线录入", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchController.java", endpoint: "@PostMapping(\"/edit\")", service_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchService.java", service_method: "editRow(", data_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/model/entity/Match.java"]}, validations: ["比赛存在"], data_changes: ["更新结果和总结"], quantity_changes: [], state_change: "比赛安排到赛后结果", transaction_boundary: "单比赛更新", failure_outcomes: ["比赛不存在时不更新"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchService.java"], acceptance_cases: ["比赛详情返回最新结果与总结"]}
+      - {flow_step_id: "FLOW-002-S08", order: 8, actor: "教练", operation_type: "mixed", original_step: "记录球员进球、助攻、出场时间、评分、能力变化和赛后点评。", target_module: "MatchModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "负责队伍教练依据比赛观察在线复盘", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/controller/MatchPlayerController.java", endpoint: "@PostMapping(\"/save\")", service_file: "base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchPlayerService.java", service_method: "saveMatchPerformance(", data_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/model/entity/MatchPlayer.java", "base-framework/src/main/java/system/store/functionModule/PlayerDataModule/model/entity/PlayerData.java"]}, validations: ["球员属于参赛队", "能力变化按新旧差值应用"], data_changes: ["保存实战表现", "同步更新球员能力档案"], quantity_changes: ["能力分值只增加或回退本次差值"], state_change: "形成赛后复盘与成长记录", transaction_boundary: "表现记录与能力变化同一事务", failure_outcomes: ["任一更新失败整体回滚"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/MatchModule/service/MatchPlayerService.java", "base-framework/src/main/java/system/store/functionModule/PlayerDataModule/service/PlayerDataService.java"], acceptance_cases: ["重复编辑复盘不会重复累计旧能力变化"]}
+
+  - flow_id: "FLOW-003"
+    name: "装备申请、发放、归还与报损闭环"
+    source_requirement_ids: ["REQ-STUDENT-012", "REQ-STUDENT-013", "REQ-ADMIN-024", "REQ-ADMIN-025", "REQ-ADMIN-026", "REQ-ADMIN-027", "REQ-ADMIN-028"]
+    steps:
+      - {flow_step_id: "FLOW-003-S01", order: 1, actor: "系统管理员", operation_type: "online", original_step: "维护装备资料、总量和当前可用数量。", target_module: "EquipmentModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/EquipmentModule/controller/EquipmentController.java", endpoint: "@PostMapping(\"/create\")", service_file: "base-framework/src/main/java/system/store/functionModule/EquipmentModule/service/EquipmentService.java", service_method: "createNewRow(", data_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentModule/model/entity/Equipment.java"]}, validations: ["总量和可用数量非负且可用量不超过总量"], data_changes: ["新增或维护装备库存资料"], quantity_changes: ["设置总量和可用数量"], state_change: "装备进入可领取范围", transaction_boundary: "单装备写入", failure_outcomes: ["数量不合法时不保存"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentModule/service/EquipmentService.java"], acceptance_cases: ["库存数量关系始终有效"]}
+      - {flow_step_id: "FLOW-003-S02", order: 2, actor: "学员或教练", operation_type: "online", original_step: "查看可用装备并提交领取数量。", target_module: "EquipmentModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/EquipmentModule/controller/EquipmentController.java", endpoint: "@PostMapping(\"/claim\")", service_file: "base-framework/src/main/java/system/store/functionModule/EquipmentModule/service/EquipmentService.java", service_method: "equipmentClaim(", data_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/model/entity/EquipmentClaim.java"]}, validations: ["装备存在", "申请数量不超过当时可用量"], data_changes: ["新增待发放领取记录"], quantity_changes: ["申请阶段不扣减可用数量"], state_change: "形成待发放记录", transaction_boundary: "领取申请写入", failure_outcomes: ["库存不足时不生成申请"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentModule/service/EquipmentService.java"], acceptance_cases: ["提交申请后库存不变"]}
+      - {flow_step_id: "FLOW-003-S03", order: 3, actor: "领取人与系统管理员", operation_type: "mixed", original_step: "双方完成线下交接后，管理员确认发放。", target_module: "EquipmentClaimModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "管理员在线确认装备已实际交给领取人", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/controller/EquipmentClaimController.java", endpoint: "@PostMapping(\"/issue/{id}\")", service_file: "base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/service/EquipmentClaimService.java", service_method: "confirmIssue(", data_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentModule/model/entity/Equipment.java", "base-framework/src/main/java/system/store/functionModule/EquipmentModule/model/entity/OutInRecord.java"]}, validations: ["领取记录待发放", "确认时再次检查可用库存"], data_changes: ["记录发放操作人", "写入出库流转记录"], quantity_changes: ["扣减可用数量"], state_change: "待发放到使用中", transaction_boundary: "库存、领取记录和流转记录同一事务", failure_outcomes: ["库存不足或状态不允许时整体不变"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/service/EquipmentClaimService.java"], acceptance_cases: ["只有确认发放后库存才减少"]}
+      - {flow_step_id: "FLOW-003-S04", order: 4, actor: "领取人", operation_type: "online", original_step: "使用结束后在线发起归还申请。", target_module: "EquipmentClaimModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/controller/EquipmentClaimController.java", endpoint: "@PostMapping(\"/return-request\")", service_file: "base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/service/EquipmentClaimService.java", service_method: "submitReturnRequest(", data_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/model/entity/EquipmentClaim.java"]}, validations: ["记录属于当前领取人", "装备正在使用"], data_changes: ["登记归还申请"], quantity_changes: ["申请阶段不恢复库存"], state_change: "使用中到待验收", transaction_boundary: "领取记录更新", failure_outcomes: ["非本人或状态不允许时保持不变"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/service/EquipmentClaimService.java"], acceptance_cases: ["归还申请后库存仍不变化"]}
+      - {flow_step_id: "FLOW-003-S05", order: 5, actor: "领取人", operation_type: "offline", original_step: "将装备线下送回库房。", target_module: "EquipmentClaimModule", no_new_backend_code: true, no_code_reason: "实物交回在线下发生，系统等待管理员验收", offline_confirmation: "", mapping: {}, validations: [], data_changes: [], quantity_changes: [], state_change: "", transaction_boundary: "无", failure_outcomes: [], evidence_files: [], acceptance_cases: ["线下交回前系统不自动恢复库存"]}
+      - {flow_step_id: "FLOW-003-S06", order: 6, actor: "系统管理员", operation_type: "mixed", original_step: "验收实物并区分正常归还、损坏或丢失数量。", target_module: "EquipmentClaimModule", no_new_backend_code: false, no_code_reason: "", offline_confirmation: "管理员依据线下验收结果在线提交核销", mapping: {controller_file: "base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/controller/EquipmentClaimController.java", endpoint: "@PostMapping(\"/settle-return\")", service_file: "base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/service/EquipmentClaimService.java", service_method: "settleReturn(", data_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/model/entity/EquipmentClaim.java"]}, validations: ["记录待验收", "正常归还与损坏丢失之和等于待处理数量", "损坏或丢失必须填写类型和说明"], data_changes: ["累计归还与报损数量", "记录验收人和时间"], quantity_changes: ["正常归还增加可用数量", "损坏或丢失核减总量"], state_change: "待验收到已归还或已报损终态", transaction_boundary: "库存、领取记录和流转记录同一事务", failure_outcomes: ["数量不守恒、说明缺失或库存异常时整体回滚"], evidence_files: ["base-framework/src/main/java/system/store/functionModule/EquipmentClaimModule/service/EquipmentClaimService.java"], acceptance_cases: ["部分正常归还并部分报损时数量守恒且生成两类流转记录"]}
+
+modules:
+  - {module_id: "MODULE-001", module_name: "用户与权限公共能力", ownership: "base_module", package_root: "system.store.baseModule", requirement_ids: ["REQ-STUDENT-001", "REQ-STUDENT-017", "REQ-ADMIN-002", "REQ-ADMIN-003", "REQ-ADMIN-004", "REQ-ADMIN-005", "REQ-ADMIN-006", "REQ-ADMIN-029"], flow_step_ids: [], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-002", module_name: "系统展示公共能力", ownership: "base_module", package_root: "system.store.baseModule.systemModule", requirement_ids: ["REQ-STUDENT-003", "REQ-ADMIN-007", "REQ-ADMIN-008", "REQ-ADMIN-009", "REQ-ADMIN-011"], flow_step_ids: [], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-003", module_name: "CourseModule", ownership: "business_module", package_root: "system.store.functionModule.CourseModule", requirement_ids: ["REQ-STUDENT-004", "REQ-COACH-001", "REQ-COACH-002", "REQ-ADMIN-012"], flow_step_ids: ["FLOW-001-S01"], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-004", module_name: "CourseScheduleModule", ownership: "business_module", package_root: "system.store.functionModule.CourseScheduleModule", requirement_ids: ["REQ-ADMIN-013", "REQ-ADMIN-014"], flow_step_ids: ["FLOW-001-S02"], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-005", module_name: "CourseOrderModule", ownership: "business_module", package_root: "system.store.functionModule.CourseOrderModule", requirement_ids: ["REQ-STUDENT-005", "REQ-COACH-003", "REQ-COACH-004", "REQ-ADMIN-015", "REQ-ADMIN-016"], flow_step_ids: ["FLOW-001-S03", "FLOW-001-S07"], module_spec_file: "", implementation_status: "partial"}
+  - {module_id: "MODULE-006", module_name: "AttendanceModule", ownership: "business_module", package_root: "system.store.functionModule.AttendanceModule", requirement_ids: ["REQ-STUDENT-006", "REQ-STUDENT-007", "REQ-COACH-005", "REQ-COACH-006", "REQ-ADMIN-017"], flow_step_ids: ["FLOW-001-S05", "FLOW-001-S06"], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-007", module_name: "PlayerDataModule", ownership: "business_module", package_root: "system.store.functionModule.PlayerDataModule", requirement_ids: ["REQ-STUDENT-008", "REQ-STUDENT-009", "REQ-STUDENT-010", "REQ-COACH-008", "REQ-COACH-009", "REQ-ADMIN-018"], flow_step_ids: ["FLOW-002-S01"], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-008", module_name: "SpecialTrainingTeamModule", ownership: "business_module", package_root: "system.store.functionModule.SpecialTrainingTeamModule", requirement_ids: ["REQ-COACH-010", "REQ-ADMIN-019"], flow_step_ids: ["FLOW-002-S02"], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-009", module_name: "SpecialTrainingMemberModule", ownership: "business_module", package_root: "system.store.functionModule.SpecialTrainingMemberModule", requirement_ids: ["REQ-COACH-007", "REQ-COACH-011", "REQ-COACH-012", "REQ-ADMIN-020"], flow_step_ids: ["FLOW-002-S03"], module_spec_file: "", implementation_status: "partial"}
+  - {module_id: "MODULE-010", module_name: "MatchModule", ownership: "business_module", package_root: "system.store.functionModule.MatchModule", requirement_ids: ["REQ-STUDENT-011", "REQ-COACH-013", "REQ-COACH-014", "REQ-COACH-015", "REQ-COACH-018", "REQ-ADMIN-021", "REQ-ADMIN-022", "REQ-ADMIN-023"], flow_step_ids: ["FLOW-002-S04", "FLOW-002-S05", "FLOW-002-S07", "FLOW-002-S08"], module_spec_file: "", implementation_status: "partial"}
+  - {module_id: "MODULE-011", module_name: "EquipmentModule", ownership: "business_module", package_root: "system.store.functionModule.EquipmentModule", requirement_ids: ["REQ-STUDENT-012", "REQ-ADMIN-024"], flow_step_ids: ["FLOW-003-S01", "FLOW-003-S02"], module_spec_file: "", implementation_status: "partial"}
+  - {module_id: "MODULE-012", module_name: "EquipmentClaimModule", ownership: "business_module", package_root: "system.store.functionModule.EquipmentClaimModule", requirement_ids: ["REQ-STUDENT-013", "REQ-ADMIN-025", "REQ-ADMIN-026", "REQ-ADMIN-027", "REQ-ADMIN-028"], flow_step_ids: ["FLOW-003-S03", "FLOW-003-S04", "FLOW-003-S06"], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-013", module_name: "ForumModule", ownership: "business_module", package_root: "system.store.functionModule.ForumModule", requirement_ids: ["REQ-STUDENT-014", "REQ-COACH-017", "REQ-ADMIN-010"], flow_step_ids: [], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-014", module_name: "UserActionModule", ownership: "business_module", package_root: "system.store.functionModule.UserActionModule", requirement_ids: ["REQ-STUDENT-015", "REQ-STUDENT-016"], flow_step_ids: [], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-015", module_name: "AnalyzeModule", ownership: "business_module", package_root: "system.store.functionModule.AnalyzeModule", requirement_ids: ["REQ-STUDENT-002", "REQ-COACH-016", "REQ-ADMIN-001"], flow_step_ids: [], module_spec_file: "", implementation_status: "platform_existing"}
+  - {module_id: "MODULE-016", module_name: "RewardModule", ownership: "business_module", package_root: "system.store.functionModule.RewardModule", requirement_ids: ["REQ-STUDENT-018"], flow_step_ids: [], module_spec_file: "", implementation_status: "to_remove"}
+
+decisions:
+  - decision_id: "DECISION-001"
+    description: "结课只形成学习结果，不再发放勋章或优先选课权益。"
+    affected_requirement_ids: ["REQ-STUDENT-005", "REQ-STUDENT-018", "REQ-COACH-004", "REQ-ADMIN-016"]
+    affected_flow_step_ids: ["FLOW-001-S07"]
+    disposition: "移除 CourseOrderService 对 RewardService 的调用；历史奖励数据是否清理另行授权。"
+    evidence: "当前 CourseOrderService.completeCourse 仍调用 RewardService，属于待移除实现。"
+  - decision_id: "DECISION-002"
+    description: "战术面板只维护场上位置和首发，不提供替补名单。"
+    affected_requirement_ids: ["REQ-COACH-013", "REQ-COACH-018", "REQ-ADMIN-021"]
+    affected_flow_step_ids: ["FLOW-002-S05"]
+    disposition: "保留阵容坐标和首发语义，前后端去除替补名单入口与文案。"
+    evidence: "MatchLineup 当前包含首发标识，需在后续实施中核对前端是否仍展示替补。"
+  - decision_id: "DECISION-003"
+    description: "装备验收必须能够同时登记正常归还与损坏或丢失。"
+    affected_requirement_ids: ["REQ-STUDENT-013", "REQ-ADMIN-026", "REQ-ADMIN-027", "REQ-ADMIN-028"]
+    affected_flow_step_ids: ["FLOW-003-S06"]
+    disposition: "使用统一归还核销动作，校验两类数量之和等于待处理数量。"
+    evidence: "EquipmentClaimService.settleReturn 已实现数量校验、库存变化和两类流转记录。"
+
+verification:
+  all_features_mapped: true
+  all_flow_steps_mapped: true
+  evidence_paths_checked: true
+  module_specs_created: false
+  implementation_verified: false
+  unverified_items:
+    - "CourseOrder 实体与建表 SQL 的结课字段尚未对齐。"
+    - "结课奖励代码仍需按最新需求移除。"
+    - "阵容接口的负责队伍权限和替补相关前端交互尚需专项验证。"
+    - "部分公开路径和角色权限仍需结合前端调用与安全配置复核。"
+
